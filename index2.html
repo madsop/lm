@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="lib/knockout-2.1.0.js"> </script>
+    <script src="lib/jquery.mobile/jquery-1.7.2.min.js"> </script>
+    <script src="src/services-stub.js"></script>
+    <script src="src/kommandemedlem.js"></script>
+    <script src="src/verving.js"> </script>
+    <script> 
+    $(document).ready(function () {
+        ko.applyBindings(new verving());
+    });
+    </script>
+</head>
+<body>
+<h3>Bli medlem i Sosialistisk Ungdom</h3>
+
+<form data-bind="submit: save">
+<input data-bind="value: fornamnText" />
+<input data-bind="value: etternamnText" placeholder="Etternamn" />
+<input data-bind="value: epostText" placeholder="Epost" />
+<input data-bind="value: telefonnummerText" placeholder="Telefonnummer" />
+<input data-bind="value: adresseText" placeholder="Adresse" />
+<input data-bind="value: postnummerText" placeholder="Postnummer" />
+<input data-bind="value: poststadText" placeholder="Poststad" />
+<input data-bind="value: fodtdatoText" placeholder="Fødselsdato" />
+<input data-bind="value: kommentararText" placeholder="Kommentarar" />
+<button type="submit">Bli med!</button>
+</form>
+
+<!--
+<ul data-bind="foreach: tasks, visible: tasks().length > 0">
+  <li>
+     <input type="checkbox" data-bind="checked: isDone" />
+     <input data-bind="value: title, disable: isDone" />
+     <a href="#" data-bind="click: $parent.removeTask">Delete</a>
+  </li> 
+</ul>
+You have <b data-bind="text: incompleteTasks().length"></b> incomplete task(s)
+<span data-bind="visible: incompleteTasks().length == 0"> - it's beer time!</span>
+<button data-bind="click: save">Save</button>
+-->
+</body>
+
