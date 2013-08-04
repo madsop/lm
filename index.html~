@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<script src="lib/knockout-2.1.0.js"> </script>
+	<script src="src/person.js"></script>
+	<script src="src/innlegg.js"></script>
+	<script src="src/timer.js"></script>
+	<script src="src/innteikna.js"></script>
+	<script src="lib/underscore-min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+</head>
+<body>
+<h3>Taletid</h3>
+
+<!--
+<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />
+<input data-bind="value: namnText" placeholder="Namn" />
+<button type="submit">Inntegn!</button>
+</form>
+
+--> 
+
+
+
+<div class='liveExample'> 
+	<form data-bind="submit:addInnlegg">
+		<select id="typeInnlegg">
+			<option value="innlegg">Innlegg</option>
+			<option value="replikk">Replikk</option>
+			<option value="dagsorden">Til dagsorden</option>
+		</select>
+
+		<select id="innleggsHaldar"></select>
+		<button type="submit">Innteikn!</button>
+	</form>
+	
+	<form data-bind="submit:addPerson">
+	<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
+		<input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' placeholder="Namn" />
+		<select id="kjonnList">
+			<option value="M">M</option>
+			<option value="K">K</option>
+		</select>
+		<button type="submit" data-bind="enable: itemToAdd().length > 0">Legg til person</button>
+	</form>
+	  
+	<p>Snakkar no: 
+		<strong>
+			<span data-bind="text: activeSpeaker().speakerName()"></span>
+			(<span data-bind="text: activeSpeaker().type"></span>)
+		</strong>
+		<span id='snakkande'></span>
+		<span data-bind"text: activeSpeaker().taletid()"></span>
+	</p>
+
+	 <ul data-bind="foreach: allItems">
+		<li>
+			<table>
+				<tr>
+					<td><span data-bind="text: getType()"></span></td>
+					<td><span data-bind="text: speaker.name"></span></td>
+					<td><a href="#" data-bind="click: $parent.maybeRemoveSpeaker">Stryk</a>
+						<a href="#" data-bind="click: $parent.flyttOpp">Flytt opp</a>
+						<a href="#" data-bind="click: $parent.flyttNed">Flytt ned</a>
+					</td>
+				</tr>
+			</table>
+		</li>
+	 </ul>
+
+	Andel jenter: <span data-bind='text: kjonnsprosent'></span>
+	 <div>
+		<button data-bind="click: nextSpeaker, enable: allItems().length > 0">Neste</button>
+	 </div>
+
+	<em>Har snakka</em>
+	<ul data-bind="foreach: harSnakka">
+		<li data-bind"text: getType() + speaker.name">
+			<span data-bind="text: getType()"></span>
+			<span data-bind="text: speaker.name"></span>
+		</li>
+	</ul>
+
+</div>
+<script type='text/javascript'>
+	var model = new LM.BetterListModel();
+	ko.applyBindings(model);
+</script>
+
+</body>
+
