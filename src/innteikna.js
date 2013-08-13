@@ -6,6 +6,22 @@ namespace.BetterListModel = function () {
 	var self = this;
 	this.itemToAdd = ko.observable("");
 
+	$.ajax({
+	    url: 'http://localhost:128/list',
+	    dataType: 'jsonp',
+	    data: { lastTimestamp: '00'},
+	    success: function (response) {
+		var resp = response.resp;
+		var parsed = jQuery.parseJSON(resp);
+		alert(parsed.speaker + ' (' +parsed.type +', ' + parsed.timestamp +')'); 
+		},
+	    error: function (xhr, error) {
+	        alert(xhr.status + error);
+	        console.log("readyState: " + xhr.readyState + "\nstatus: " + xhr.status);
+	        console.log("responseText: " + xhr.responseText);
+	    }
+	});
+
 	this.allPersons = {
 		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),
 		Marie: namespace.Person.create({name:"Marie",kjonn:"K"}), 

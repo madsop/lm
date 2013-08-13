@@ -1,0 +1,4 @@
+{"speaker": "Marie", "type": "Innlegg", "timestamp": 1 }
+This is a test read file.
+test2
+test3
