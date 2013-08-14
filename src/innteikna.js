@@ -11,9 +11,11 @@ namespace.BetterListModel = function () {
 	    dataType: 'jsonp',
 	    data: { lastTimestamp: '00'},
 	    success: function (response) {
-		var resp = response.resp;
-		var parsed = jQuery.parseJSON(resp);
-		alert(parsed.speaker + ' (' +parsed.type +', ' + parsed.timestamp +')'); 
+		var resp = response.response;
+		var parsed = _.map(resp, function (element) { 
+			return jQuery.parseJSON(element); 
+		});
+		receivePersonListFromServer(parsed);
 		},
 	    error: function (xhr, error) {
 	        alert(xhr.status + error);
@@ -21,6 +23,17 @@ namespace.BetterListModel = function () {
 	        console.log("responseText: " + xhr.responseText);
 	    }
 	});
+	
+	var receivePersonListFromServer = function (receivedPersons) {
+		_.each(receivedPersons, function (receivedPerson) {
+			if (self.allPersons[receivedPerson.speaker] !== undefined) {
+				var speaker = self.allPersons[receivedPerson.speaker];
+				var innlegg = namespace.Innlegg.create({type:receivedPerson.type, speaker: speaker});
+				self.harSnakka.push(innlegg);
+			}
+		});
+		oppdaterKjonnsfordeling();
+	};
 
 	this.allPersons = {
 		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),

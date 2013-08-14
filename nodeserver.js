@@ -27,7 +27,8 @@ app.get('/list*', function (request, response) {
             console.log(array);
 	    // use the array
 	console.log(request.query);
-	response.jsonp({'resp': array[0]});
+
+	response.jsonp({'response': array});
 	 });
 });
 app.listen(128, 'localhost');
