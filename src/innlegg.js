@@ -19,13 +19,20 @@ var LM = LM || {};
 				return 120;
 			}
 	}
+
+	namespace.InnleggsId = (function(){
+		var id = 0;
+		return function () { return id++; }
+	})();
+
 	namespace.Innlegg = {
 		create: function (params){
 			var instance = Object.create(this);
 			params = params || {};
 			instance.type = params.type || "Innlegg";
 			instance.speaker = params.speaker || {};
-			return instance;	
+			instance.id = params.timestamp || namespace.InnleggsId();
+			return instance;
 		},
 		getType: function () {
 			return this.type;
@@ -35,6 +42,9 @@ var LM = LM || {};
 		},
 		speakerName: function () {
 			return this.speaker.name;
+		},
+		id: function () {
+			return this.id;
 		}
 	};
 }(LM));

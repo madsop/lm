@@ -1,4 +1,6 @@
 {"speaker": "saklds", "type": "Innlegg", "timestamp": 4 }
+{"speaker": "saklds", "type": "Innlegg", "timestamp": 5 }
+{"speaker": "Seher", "type": "Innlegg", "timestamp": 6 }
 {"speaker": "Marie", "type": "Innlegg", "timestamp": 1 }
 {"speaker": "Mads", "type": "Innlegg", "timestamp": 2 }
 {"speaker": "Mads", "type": "Innlegg", "timestamp": 3 }

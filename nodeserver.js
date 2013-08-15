@@ -28,7 +28,7 @@ app.get('/list*', function (request, response) {
 	    // use the array
 	console.log(request.query);
 
-	response.jsonp({'response': array});
+	response.jsonp({'response': array, 'lastSpeaker': 2});
 	 });
 });
 app.listen(128, 'localhost');

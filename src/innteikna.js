@@ -6,6 +6,8 @@ namespace.BetterListModel = function () {
 	var self = this;
 	this.itemToAdd = ko.observable("");
 
+	
+	var receiveSpeakerList = function () {
 	$.ajax({
 	    url: 'http://localhost:128/list',
 	    dataType: 'jsonp',
@@ -15,7 +17,7 @@ namespace.BetterListModel = function () {
 		var parsed = _.map(resp, function (element) { 
 			return jQuery.parseJSON(element); 
 		});
-		receivePersonListFromServer(parsed);
+		receivePersonListFromServer(parsed, response.lastSpeaker);
 		},
 	    error: function (xhr, error) {
 	        alert(xhr.status + error);
@@ -23,18 +25,8 @@ namespace.BetterListModel = function () {
 	        console.log("responseText: " + xhr.responseText);
 	    }
 	});
-	
-	var receivePersonListFromServer = function (receivedPersons) {
-		_.each(receivedPersons, function (receivedPerson) {
-			if (self.allPersons[receivedPerson.speaker] !== undefined) {
-				var speaker = self.allPersons[receivedPerson.speaker];
-				var innlegg = namespace.Innlegg.create({type:receivedPerson.type, speaker: speaker});
-				self.harSnakka.push(innlegg);
-			}
-		});
-		oppdaterKjonnsfordeling();
 	};
-
+	
 	this.allPersons = {
 		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),
 		Marie: namespace.Person.create({name:"Marie",kjonn:"K"}), 
@@ -42,6 +34,30 @@ namespace.BetterListModel = function () {
 		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"})
 	};
 
+	var receivePersonListFromServer = function (receivedPersons, lastTimestamp) {
+		var sortedList = _.sortBy(receivedPersons, function (person) { return person.timestamp; });
+		_.each(sortedList, function (receivedPerson) {
+			if (self.allPersons[receivedPerson.speaker] !== undefined) {
+				var speaker = self.allPersons[receivedPerson.speaker];
+				var innlegg = namespace.Innlegg.create({type:receivedPerson.type, speaker: speaker, id: receivedPerson.timestamp});
+
+				if (innlegg.id < lastTimestamp) {
+					self.harSnakka.push(innlegg);
+				}
+				else if (innlegg.id > lastTimestamp) {
+					self.allItems.push(innlegg);
+				}
+				else {
+					console.log(innlegg.id);
+				}
+			}
+		});
+		oppdaterKjonnsfordeling();
+	};
+
+
+	this.activeSpeaker = ko.observable(namespace.Innlegg.create({type:"Innlegg", speaker:this.allPersons.Marie}));			
+	receiveSpeakerList();
 	this.fillSelect = function () {
 		var returnText = "";
 		_.each(this.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" +person.name +"</option>" } );	
@@ -50,14 +66,13 @@ namespace.BetterListModel = function () {
 
 	this.fillSelect();
 	this.allItems = ko.observableArray([
-		namespace.Innlegg.create({speaker:this.allPersons.Seher, type:"Innlegg"}),
+/*		namespace.Innlegg.create({speaker:this.allPersons.Seher, type:"Innlegg"}),
 		namespace.Innlegg.create({speaker:this.allPersons.Mads, type:"Innlegg"}),
-		namespace.Innlegg.create({speaker:this.allPersons.Marie, type:"Innlegg"})
+		namespace.Innlegg.create({speaker:this.allPersons.Marie, type:"Innlegg"}) */
 	]); // Initial items
 
 	this.harSnakka = ko.observableArray([]);
 	
-	this.activeSpeaker = ko.observable(namespace.Innlegg.create({type:"Innlegg", speaker:this.allPersons.Marie}));								
 	namespace.reset(this.activeSpeaker(), this.harSnakka());
 	namespace.Timer(this.activeSpeaker());
 	this.kjonnsprosent = ko.observable("-");
@@ -134,7 +149,8 @@ namespace.BetterListModel = function () {
 		oppdaterKjonnsfordeling();
 		namespace.reset(this.activeSpeaker(), this.harSnakka());
 		new namespace.Timer(this.activeSpeaker());
-		if (this.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = this.activeSpeaker(); } 
+		if (this.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = this.activeSpeaker(); }
+		// server.updateLastTimestamp(this.timestamp);  
 	};
 
 	var oppdaterKjonnsfordeling = function () {
