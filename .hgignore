@@ -1,2 +1,4 @@
 ymse
 ymse/*
+syntax: glob
+*.swp

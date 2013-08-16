@@ -6,25 +6,10 @@ namespace.BetterListModel = function () {
 	var self = this;
 	this.itemToAdd = ko.observable("");
 
+	this.hub = namespace.hub.create();
 	
 	var receiveSpeakerList = function () {
-	$.ajax({
-	    url: 'http://localhost:128/list',
-	    dataType: 'jsonp',
-	    data: { lastTimestamp: '00'},
-	    success: function (response) {
-		var resp = response.response;
-		var parsed = _.map(resp, function (element) { 
-			return jQuery.parseJSON(element); 
-		});
-		receivePersonListFromServer(parsed, response.lastSpeaker);
-		},
-	    error: function (xhr, error) {
-	        alert(xhr.status + error);
-	        console.log("readyState: " + xhr.readyState + "\nstatus: " + xhr.status);
-	        console.log("responseText: " + xhr.responseText);
-	    }
-	});
+		self.hub.onRefresh(receivePersonListFromServer);
 	};
 	
 	this.allPersons = {
@@ -33,6 +18,16 @@ namespace.BetterListModel = function () {
 		Seher: namespace.Person.create({name:"Seher",kjonn:"K"}), 
 		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"})
 	};
+
+	this.activeSpeaker = ko.observable();
+	
+	this.activeSpeakerName = (function () { //TODO: få denne til å funke...
+		var returnText = ko.observable("");
+		if (self.activeSpeaker() !== undefined){
+			returnText = self.activeSpeaker().speakerName;
+		}
+		return returnText;
+	})();
 
 	var receivePersonListFromServer = function (receivedPersons, lastTimestamp) {
 		var sortedList = _.sortBy(receivedPersons, function (person) { return person.timestamp; });
@@ -48,11 +43,12 @@ namespace.BetterListModel = function () {
 					self.allItems.push(innlegg);
 				}
 				else {
-					console.log(innlegg.id);
+					//console.log(innlegg.id);
 				}
 			}
 		});
-		oppdaterKjonnsfordeling();
+		self.nextSpeaker(lastTimestamp);
+		//oppdaterKjonnsfordeling();
 	};
 
 
@@ -73,8 +69,8 @@ namespace.BetterListModel = function () {
 
 	this.harSnakka = ko.observableArray([]);
 	
-	namespace.reset(this.activeSpeaker(), this.harSnakka());
-	namespace.Timer(this.activeSpeaker());
+//	namespace.reset(this.activeSpeaker(), this.harSnakka());
+//	namespace.Timer(this.activeSpeaker());
 	this.kjonnsprosent = ko.observable("-");
 	var sisteInnlegg = this.activeSpeaker();
 
@@ -93,6 +89,10 @@ namespace.BetterListModel = function () {
 	this.addInnlegg = function () {
 		var selectList = document.getElementById("typeInnlegg");
 		var personList = document.getElementById("innleggsHaldar");
+
+		// server.addInnlegg(
+		// speaker,
+		// , type) - som under; stryk da resten av denne metoden (woho) - eller flytt logikken til ein annan stad eller noko sånt
 
 		var newInnlegg = namespace.Innlegg.create({
 			speaker:this.allPersons[personList.options[personList.selectedIndex].text],
@@ -138,11 +138,18 @@ namespace.BetterListModel = function () {
 		self.allItems.splice(count,0,newPerson);
 	};
 
+	var strykInnlegg = function(innlegg) {
+		self.allItems.remove(innlegg);
+	}
+
 	this.maybeRemoveSpeaker = function (speaker) {
-		if (confirm("Er du sikker på at du vil stryke " +speaker.speakerName() +"?")) { self.allItems.remove(speaker); }
+		if (confirm("Er du sikker på at du vil stryke " +speaker.speakerName() +"?")) { 
+			self.hub.stryk(speaker, strykInnlegg);
+		}
 	};
  
-	this.nextSpeaker = function () { 
+	this.nextSpeaker = function (lastTimestamp) { 
+		lastTimestamp = lastTimestamp || this.activeSpeaker().id;
 		this.harSnakka.push(this.activeSpeaker());
 		this.activeSpeaker(_.first(this.allItems()));
 		this.allItems.splice(0,1);
@@ -150,11 +157,13 @@ namespace.BetterListModel = function () {
 		namespace.reset(this.activeSpeaker(), this.harSnakka());
 		new namespace.Timer(this.activeSpeaker());
 		if (this.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = this.activeSpeaker(); }
+		self.hub.nesteTalar(this.activeSpeaker().id);
 		// server.updateLastTimestamp(this.timestamp);  
 	};
 
 	var oppdaterKjonnsfordeling = function () {
 		var temp = _.countBy(self.harSnakka(), function (speakers) {
+			if (speakers === undefined) { return; }
 			return speakers.speaker.kjonn;
 		});
 		if (typeof(temp.M) === "undefined" ) { temp.M = 0; }
