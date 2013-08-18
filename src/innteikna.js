@@ -149,15 +149,15 @@ namespace.BetterListModel = function () {
 	};
  
 	this.nextSpeaker = function (lastTimestamp) { 
-		lastTimestamp = lastTimestamp || this.activeSpeaker().id;
-		this.harSnakka.push(this.activeSpeaker());
-		this.activeSpeaker(_.first(this.allItems()));
-		this.allItems.splice(0,1);
+		lastTimestamp = lastTimestamp.timestamp || this.activeSpeaker().id;
+		self.harSnakka.push(self.activeSpeaker());
+		self.activeSpeaker(_.first(self.allItems()));
+		self.allItems.splice(0,1);
 		oppdaterKjonnsfordeling();
-		namespace.reset(this.activeSpeaker(), this.harSnakka());
-		new namespace.Timer(this.activeSpeaker());
-		if (this.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = this.activeSpeaker(); }
-		self.hub.nesteTalar(this.activeSpeaker().id);
+		namespace.reset(self.activeSpeaker(), self.harSnakka());
+		new namespace.Timer(self.activeSpeaker());
+		if (self.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = self.activeSpeaker(); }
+		self.hub.nesteTalar(self.activeSpeaker().id);
 		// server.updateLastTimestamp(this.timestamp);  
 	};
 
@@ -171,5 +171,9 @@ namespace.BetterListModel = function () {
 
 		self.kjonnsprosent(((temp.K / (temp.M + temp.K))*100).toFixed(1) + "%"); 
 	}
+	
+	self.hub.subscribe('/nesteTalar', function (a) { console.log(a); });
+	self.hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
+	
 };
 }(LM));

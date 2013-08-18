@@ -1,13 +1,14 @@
 var express = require('express'),
 	faye = require('faye'),
 	readline = require('readline'),
-	fs = require('fs');
-
+	fs = require('fs'),
+	_ = require('underscore');
 
 var bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45});
 
 var app = express();
 
+var tekstfilNamn = 'testles.txt';
 
 app.all('/*', function(req, res, next) {
 //  console.log(res);
@@ -43,12 +44,17 @@ app.configure('production', function(){
   app.use(express.errorHandler());
 });
 
+// SETUP FERDIG HER
+
+var heileTalelista = [];
+
 var writeFile = function (filename, data) {
 	fs.writeFile(filename, data, function (err) {
 		if (err) throw err;
 		console.log('Lagra fil ' +filename + ' med ' + data);
 	});
 }
+
 
 var timestampCounter = 0;
 var nesteTalar = function (data){
@@ -57,24 +63,27 @@ var nesteTalar = function (data){
 	writeFile('timestamp.txt', timestampCounter);
 	return timestampCounter;
 }
-var stryk = function (innlegg) {
-	if (innlegg <= timestampCounter) { return; } 
+var lagreTaleliste = function () {
+	writeFile(tekstfilNamn, heileTalelista);
+}
+var stryk = function (innleggId) {
+	if (innleggId <= timestampCounter) { return; } 
 	// les fra array over tekstfil, finn timestamp, slett linje. kontrollsjekk om timestamp > noverande talar
-	var lagraInnlegg = [];
+	var skalFjernes = _.find(heileTalelista, function (element) { 
+		console.log("timestamp: " +element.timestamp +", id som skal finnast: " +innleggId);
+		return element.timestamp == innleggId; });
+	console.log(skalFjernes);
+	heileTalelista = _.without(heileTalelista, skalFjernes);
+	_.each(heileTalelista, function (elem) { console.log(elem); });
+	lagreTaleliste();
+}
 
-	var rd = readline.createInterface({
-		input: fs.createReadStream('testles.txt'),
-		output: process.stdout,
-		terminal: false
+var lesInnTaleliste = function () {
+	var tempInnlese = fs.readFileSync(tekstfilNamn).toString().split('\n');
+	_.each(tempInnlese, function (element) {
+		if (element.length === 0) { return; }
+		heileTalelista.push(JSON.parse(element));
 	});
-	rd.on('line', function (line) {
-		var timestamp = line.split('"timestamp": ')[1].slice(0,-2); // pokker, så hack
-		if (parseInt(timestamp) !== parseInt(innlegg.innlegg.id)) {
-			lagraInnlegg.push(line + "\n");
-		}
-	writeFile('testles2.txt', lagraInnlegg);
-	});
-
 }
 
 bayeux.bind('publish', function(clientId, channel, data) {
@@ -86,25 +95,15 @@ bayeux.bind('publish', function(clientId, channel, data) {
 			stryk(data);
 			break;
 	}
-	console.log(clientId + ' . ' + channel + ' . ' + data.speaker);
+//	consolelog(clientId + ' . ' + channel + ' . ' + data.speaker);
 });
 
 app.get('/lm/taleliste', function (request, response) {
-/*	var stream = fs.createReadStream('testles.txt');i
-	console.log(stream);
-	stream.on('line', function(line) { 
-		console.log(line); 
-	});
-*/
-//	fs.readFile('testles.txt', 'utf8', function (err, data) { console.log(data); });
-	fs.readFile('testles.txt', function(err, f){
-	    var array = f.toString().trim().split('\n');
-//            console.log(array);
-	    // use the array
-//	console.log(request.query);
-
-	response.jsonp({'response': array, 'lastSpeaker': 0});
+	fs.readFile(tekstfilNamn, function(err, f){
+		var array = f.toString().trim().split('\n');
+		response.jsonp({'response': array, 'lastSpeaker': 0});
 	 });
+	lesInnTaleliste();
 });
 bayeux.attach(app);
 app.listen(128, 'localhost');

@@ -5,7 +5,7 @@ var LM = LM || {};
 	var hostURL = 'http://localhost:128';
 	var client = new Faye.Client(hostURL+'/faye');
 
-	var subscribe = function(channel, callback){
+	var sub = function(channel, callback){
 		client.subscribe(channel, callback);
 		//function (message){	alert('message received: ' + message
 	}
@@ -33,20 +33,18 @@ var LM = LM || {};
 			var pb = publish('/stryk', {innlegg: innlegg});
 			pb.callback(callback(innlegg));
 		},
+		subscribe: function (keyword, callback) {
+			sub(keyword, callback);
+		},
 		onRefresh: function (callback) {
-			subscribe('/nesteTalar', function (response) { console.log(response); });
-			subscribe('/stryk', function () { });
-
-
-//			client.publish('/faye', {text: 'testTekst'});
 			$.ajax({
 				url: hostURL +'/lm/taleliste',
 				dataType: 'jsonp',
-				data: { lastTimestamp: '00'},
+				data: { },
 				success: function (response) {
 					var resp = response.response;
 					var parsed = _.map(resp, function (element) { 
-						return jQuery.parseJSON(element); 
+						return jQuery.parseJSON(element);
 					});
 					callback(parsed, response.lastSpeaker);
 				},
