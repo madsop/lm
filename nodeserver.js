@@ -2,7 +2,7 @@ var express = require('express'),
 	faye = require('faye'),
 	readline = require('readline'),
 	fs = require('fs'),
-	_ = require('underscore');
+	_ = require('lodash');
 
 var bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45});
 
