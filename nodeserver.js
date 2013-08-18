@@ -64,26 +64,19 @@ var nesteTalar = function (data){
 	return timestampCounter;
 }
 var lagreTaleliste = function () {
-	writeFile(tekstfilNamn, heileTalelista);
+	writeFile(tekstfilNamn, JSON.stringify(heileTalelista));
 }
 var stryk = function (innleggId) {
-	if (innleggId <= timestampCounter) { return; } 
-	// les fra array over tekstfil, finn timestamp, slett linje. kontrollsjekk om timestamp > noverande talar
+//	if (innleggId <= timestampCounter) { return; } 
 	var skalFjernes = _.find(heileTalelista, function (element) { 
 		console.log("timestamp: " +element.timestamp +", id som skal finnast: " +innleggId);
 		return element.timestamp == innleggId; });
-	console.log(skalFjernes);
 	heileTalelista = _.without(heileTalelista, skalFjernes);
-	_.each(heileTalelista, function (elem) { console.log(elem); });
 	lagreTaleliste();
 }
 
 var lesInnTaleliste = function () {
-	var tempInnlese = fs.readFileSync(tekstfilNamn).toString().split('\n');
-	_.each(tempInnlese, function (element) {
-		if (element.length === 0) { return; }
-		heileTalelista.push(JSON.parse(element));
-	});
+	heileTalelista = JSON.parse(fs.readFileSync(tekstfilNamn));
 }
 
 bayeux.bind('publish', function(clientId, channel, data) {
@@ -92,18 +85,16 @@ bayeux.bind('publish', function(clientId, channel, data) {
 			nesteTalar(data);
 			break;
 		case '/stryk':
-			stryk(data);
+			console.log('mottatt, innlegg: ' +data.innlegg);
+			stryk(data.innlegg);
 			break;
 	}
 //	consolelog(clientId + ' . ' + channel + ' . ' + data.speaker);
 });
 
 app.get('/lm/taleliste', function (request, response) {
-	fs.readFile(tekstfilNamn, function(err, f){
-		var array = f.toString().trim().split('\n');
-		response.jsonp({'response': array, 'lastSpeaker': 0});
-	 });
 	lesInnTaleliste();
+	response.jsonp({'response': heileTalelista, 'lastSpeaker': 0});
 });
 bayeux.attach(app);
 app.listen(128, 'localhost');

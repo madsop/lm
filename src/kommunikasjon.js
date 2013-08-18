@@ -43,10 +43,7 @@ var LM = LM || {};
 				data: { },
 				success: function (response) {
 					var resp = response.response;
-					var parsed = _.map(resp, function (element) { 
-						return jQuery.parseJSON(element);
-					});
-					callback(parsed, response.lastSpeaker);
+					callback(resp, response.lastSpeaker);
 				},
 				error: function (xhr, error) {
 					alert(xhr.status + error);

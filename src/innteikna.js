@@ -144,12 +144,12 @@ namespace.BetterListModel = function () {
 
 	this.maybeRemoveSpeaker = function (speaker) {
 		if (confirm("Er du sikker på at du vil stryke " +speaker.speakerName() +"?")) { 
-			self.hub.stryk(speaker, strykInnlegg);
+			self.hub.stryk(speaker.id, strykInnlegg);
 		}
 	};
  
 	this.nextSpeaker = function (lastTimestamp) { 
-		lastTimestamp = lastTimestamp.timestamp || this.activeSpeaker().id;
+		lastTimestamp = lastTimestamp || this.activeSpeaker().id;
 		self.harSnakka.push(self.activeSpeaker());
 		self.activeSpeaker(_.first(self.allItems()));
 		self.allItems.splice(0,1);
