@@ -7,7 +7,6 @@ var LM = LM || {};
 
 	var sub = function(channel, callback){
 		client.subscribe(channel, callback);
-		//function (message){	alert('message received: ' + message
 	}
 
 	var publish = function (channel, data) {
@@ -20,18 +19,24 @@ var LM = LM || {};
 			return instance;	
 		},
 		nyttInnlegg: function (innlegg) {
+			publish('/nyttInnlegg', {innlegg: innlegg});
+		},
+		nyReplikk: function (replikk) {
+			publish('/nyReplikk', {replikk: replikk});
 		},
 		nyPerson: function (person) {
 		},
 		nesteTalar: function (timestamp) {
-			var publi = client.publish('/nesteTalar', {timestamp: timestamp});
-	//		publi.callback(function() { alert('publication received'); });
+			publish('/nesteTalar', {timestamp: timestamp});
 		},
-		flytting: function (innlegg, oppEllerNed) {
+		flyttOpp: function (innlegg) {
+			publish('/flyttOpp', {innlegg: innlegg});
 		},
-		stryk: function (innlegg,callback) {
-			var pb = publish('/stryk', {innlegg: innlegg});
-			pb.callback(callback(innlegg));
+		flyttNed: function (innlegg) {
+			publish('/flyttNed', {innlegg: innlegg});
+		},
+		stryk: function (innlegg) {
+			publish('/stryk', {innlegg: innlegg});
 		},
 		subscribe: function (keyword, callback) {
 			sub(keyword, callback);

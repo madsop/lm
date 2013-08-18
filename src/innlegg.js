@@ -20,23 +20,17 @@ var LM = LM || {};
 			}
 	}
 
-	namespace.InnleggsId = (function(){
-		var id = 0;
-		return function () { return id++; }
-	})();
-
 	namespace.Innlegg = {
 		create: function (params){
 			var instance = Object.create(this);
 			params = params || {};
 			instance.type = params.type || "Innlegg";
 			instance.speaker = params.speaker || {};
-			instance.id = params.timestamp || namespace.InnleggsId();
+			instance.id = params.id; 
 			return instance;
 		},
-		getType: function () {
-			return this.type;
-		},
+		getType: function () { return this.type; }
+		,
 		taletid: function (harSnakka) {
 			return beregnTaletid(this,harSnakka);
 		},
@@ -45,6 +39,9 @@ var LM = LM || {};
 		},
 		id: function () {
 			return this.id;
+		},
+		setId: function (id) {
+			this.id = id;
 		}
 	};
 }(LM));
