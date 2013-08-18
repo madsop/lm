@@ -67,7 +67,7 @@ var lagreTaleliste = function () {
 var stryk = function (innleggId) {
 //	if (innleggId <= timestampCounter) { return; } 
 	var skalFjernes = _.find(heileTalelista, function (element) { 
-		console.log("timestamp: " +element.id +", id som skal finnast: " +innleggId);
+//		console.log("timestamp: " +element.id +", id som skal finnast: " +innleggId);
 		return element.id == innleggId; });
 	heileTalelista = _.without(heileTalelista, skalFjernes);
 	lagreTaleliste();
@@ -127,7 +127,6 @@ bayeux.bind('publish', function(clientId, channel, data) {
 			nesteTalar(data);
 			break;
 		case '/stryk':
-			console.log('mottatt, innlegg: ' +data.innlegg);
 			stryk(data.innlegg);
 			break;
 		case '/nyttInnlegg':

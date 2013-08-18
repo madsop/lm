@@ -61,8 +61,8 @@ namespace.BetterListModel = function () {
 	var sisteInnlegg = this.activeSpeaker();
 
 	this.addPerson = function () {
-		if (this.itemToAdd() !== "") { // Prevent blanks
-				var newPerson = namespace.Person.create({
+		if (this.itemToAdd() !== "") { 
+			var newPerson = namespace.Person.create({
 				name:this.itemToAdd(),
 				kjonn:kjonnList.options[kjonnList.selectedIndex].text
 			});
@@ -148,8 +148,7 @@ namespace.BetterListModel = function () {
 	};
 
 	var strykInnlegg = function(innleggId) {
-		var innlegget = _.find(self.allItems(), function (innlegg) { 
-			return innlegg.id == innleggId.innlegg; });
+		var innlegget = _.find(self.allItems(), function (innlegg) { return innlegg.id == innleggId.innlegg; });
 		self.allItems.remove(innlegget);
 	}
 
@@ -159,9 +158,6 @@ namespace.BetterListModel = function () {
 		}
 	};
 
-	var changeToNext = function () {
-	}
- 
 	this.nextSpeaker = function (lastTimestamp) {
 		lastTimestamp = lastTimestamp || self.activeSpeaker().id;
 		if (self.activeSpeaker().getType() !== 'mock') { 
@@ -186,15 +182,18 @@ namespace.BetterListModel = function () {
 
 		self.kjonnsprosent(((temp.K / (temp.M + temp.K))*100).toFixed(1) + "%"); 
 	}
-	
-	self.hub.subscribe('/nesteTalar', function (a) { /*console.log(a);*/ });
-	self.hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
-	self.hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
-	self.hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
-	self.hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
-	self.hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
-	self.hub.subscribe('/nyttInnleggId', function (innlegg) {
-		var unset = _.find(self.allItems(), function (element) { return element.id == undefined; });
-		unset.setId(innlegg.id); });
+
+	var subscribe = function () {	
+		self.hub.subscribe('/nesteTalar', function (a) { /*console.log(a);*/ });
+		self.hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
+		self.hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
+		self.hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
+		self.hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
+		self.hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
+		self.hub.subscribe('/nyttInnleggId', function (innlegg) {
+			var unset = _.find(self.allItems(), function (element) { return element.id == undefined; });
+			unset.setId(innlegg.id); 
+		});
+	}();
 };
 }(LM));
