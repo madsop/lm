@@ -4,7 +4,7 @@ var LM = LM || {};
 "use strict";
 namespace.BetterListModel = function () {
 	var self = this;
-	this.itemToAdd = ko.observable("");
+	this.newPersonName = ko.observable("");
 
 	this.hub = namespace.hub.create();
 	
@@ -22,8 +22,7 @@ namespace.BetterListModel = function () {
 	this.activeSpeaker = ko.observable({speaker: {name: 'Pause'}, getType: function() { return 'mock'; }});
 
 	var lagInnleggsobjekt = function (receivedInnlegg) {
-		var innlegg = namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
-		return innlegg;
+		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
 	}
 
 	var receivePersonListFromServer = function (receivedInnleggs, lastTimestamp) {
@@ -50,26 +49,21 @@ namespace.BetterListModel = function () {
 	}
 
 	this.fillSelect();
-	this.allItems = ko.observableArray([
-/*		namespace.Innlegg.create({speaker:this.allPersons.Seher, type:"Innlegg"}),
-		namespace.Innlegg.create({speaker:this.allPersons.Mads, type:"Innlegg"}),
-		namespace.Innlegg.create({speaker:this.allPersons.Marie, type:"Innlegg"}) */
-	]); // Initial items
-
+	this.allItems = ko.observableArray([]); 
 	this.harSnakka = ko.observableArray([]);
 	this.kjonnsprosent = ko.observable("-");
 	var sisteInnlegg = this.activeSpeaker();
 
 	this.addPerson = function () {
-		if (this.itemToAdd() !== "") { 
+		if (this.newPersonName() !== "") { 
 			var newPerson = namespace.Person.create({
-				name:this.itemToAdd(),
+				name:this.newPersonName(),
 				kjonn:kjonnList.options[kjonnList.selectedIndex].text
 			});
 			this.allPersons[newPerson.name] = newPerson; 
 			this.fillSelect();
 		}	
-		this.itemToAdd(""); 
+		this.newPersonName(""); 
 	}
 
 	this.addInnlegg = function () {
@@ -77,14 +71,19 @@ namespace.BetterListModel = function () {
 		var personList = document.getElementById("innleggsHaldar");
 
 		var type = selectList.options[selectList.selectedIndex].text;
+
+		if (type === "Replikk" && this.activeSpeaker().getType() === "Svarreplikk") { 
+			return; 
+		}
+		
 		var speaker = this.allPersons[personList.options[personList.selectedIndex].text]
 		var newInnlegg = namespace.Innlegg.create({
 			type:type,
 			speaker:speaker
 		});
 
-		if (newInnlegg.getType() === "Til dagsorden") {
-			this.allItems.splice(0,0,newInnlegg);
+		if (newInnlegg.getType() === "Til dagsorden") { //			this.allItems.splice(0,0,newInnlegg);
+			self.hub.tilDagsorden(newInnlegg);
 		}
 		else if (newInnlegg.getType() === "Replikk") {
 			self.hub.nyReplikk(newInnlegg);
@@ -96,10 +95,21 @@ namespace.BetterListModel = function () {
 
 	var nyttInnlegg = function (innlegg) {
 		self.allItems.push(lagInnleggsobjekt(innlegg.innlegg));
-	}	
+	}
+	var tilDagsorden = function (innlegg) {
+		if (_.first(self.allItems()).type !== "Til dagsorden") {
+			self.allItems.unshift(innlegg);
+		}
+		else {
+			var indexToPutObject = _.find(self.allItems(), function (element) { return element.type !== "Til dagsorden"; });
+			self.allItems.splice(_.indexOf(self.allItems(), indexToPutObject), 0, lagInnleggsobjekt(innlegg.innlegg));
+		}
+	}
 	
 	this.flyttOppTrykka = function (innlegg) {
-		self.hub.flyttOpp(innlegg);
+		if (_.first(self.allItems()) !== innlegg){
+			self.hub.flyttOpp(innlegg);
+		}
 	}
 
 	var flyttOpp = function (innlegg2) {
@@ -114,7 +124,9 @@ namespace.BetterListModel = function () {
 	};
 
 	this.flyttNedTrykka = function (innlegg) {
-		self.hub.flyttNed(innlegg);
+		if (_.last(self.allItems()) !== innlegg) {
+			self.hub.flyttNed(innlegg);
+		}
 	}
 
 	var flyttNed = function (innlegg2) {
@@ -131,6 +143,7 @@ namespace.BetterListModel = function () {
 
 	var nyReplikk = function (newReplikk) {
 		// legg inn replikk etter siste replikk eller første innlegg
+		if (self.activeSpeaker().getType() === "Svarreplikk") { return; }
 		var count = 0;
 		var itemInList = self.allItems()[count];
 		while (itemInList != null && ( itemInList.getType() !== "Innlegg" && itemInList.getType() !== "Svarreplikk" ) ) {
@@ -188,11 +201,12 @@ namespace.BetterListModel = function () {
 		self.hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
 		self.hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
 		self.hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
+		self.hub.subscribe('/tilDagsorden', function (innlegg) { tilDagsorden(innlegg); });
 		self.hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
 		self.hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
 		self.hub.subscribe('/nyttInnleggId', function (innlegg) {
-			var unset = _.find(self.allItems(), function (element) { return element.id == undefined; });
-			unset.setId(innlegg.id); 
+			var innleggUtanId = _.find(self.allItems(), function (element) { return element.id == undefined; });
+			innleggUtanId.setId(innlegg.id); 
 		});
 	}();
 };

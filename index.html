@@ -42,12 +42,12 @@
 		Legg til person p&aring; m&oslash;tet
 		<form data-bind="submit:addPerson">
 		<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
-			<input type="text" data-bind='value:itemToAdd, valueUpdate: "afterkeydown"' placeholder="Namn" />
+			<input type="text" data-bind='value:newPersonName, valueUpdate: "afterkeydown"' placeholder="Namn" />
 			<select id="kjonnList">
 				<option value="K">Kvinne</option>
 				<option value="M">Mann</option>
 			</select>
-			<button type="submit" data-bind="enable: itemToAdd().length > 0">Legg til person</button>
+			<button type="submit" data-bind="enable: newPersonName().length > 0">Legg til person</button>
 		</form>
 	</div>
 	  

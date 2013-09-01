@@ -2,17 +2,17 @@ var LM = LM || {};
 
 (function (namespace) {
 "use strict";
-	var beregnTaletid = function (self, harSnakka) {
-			if (self.type === "Innlegg"){
+	var beregnTaletid = function (innlegg, harSnakka) {
+			if (innlegg.type === "Innlegg"){
 				var speakers = _.pluck(harSnakka, 'speaker');
-				if (_.contains(speakers, self.speaker)) {
+				if (_.contains(speakers, innlegg.speaker)) {
 					return 120;
 				}
 				else {
 					return 180;
 				}
 			}
-			else if (self.type === "Replikk" || self.type === "Svarreplikk") {
+			else if (innlegg.type === "Replikk" || innlegg.type === "Svarreplikk") {
 				return 60;
 			}
 			else {
@@ -29,8 +29,9 @@ var LM = LM || {};
 			instance.id = params.id; 
 			return instance;
 		},
-		getType: function () { return this.type; }
-		,
+		getType: function () { 
+			return this.type; 
+		},
 		taletid: function (harSnakka) {
 			return beregnTaletid(this,harSnakka);
 		},

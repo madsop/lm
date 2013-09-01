@@ -24,6 +24,9 @@ var LM = LM || {};
 		nyReplikk: function (replikk) {
 			publish('/nyReplikk', {replikk: replikk});
 		},
+		tilDagsorden: function (innlegg) {
+			publish('/tilDagsorden', {innlegg: innlegg});
+		},
 		nyPerson: function (person) {
 		},
 		nesteTalar: function (timestamp) {
