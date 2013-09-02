@@ -1,5 +1,6 @@
 <!DOCTYPE HTML>
-<html> <head>
+<html>
+<head>
 	<script src="lib/knockout-2.1.0.js"> </script>
 	<script src="lib/underscore-min.js"></script>
 	<script src="lib/jquery-2.0.3.min.js"></script>
@@ -24,31 +25,9 @@
 <div class='liveExample'> 
 <h2>Taletid</h2>
 	<div id="addInnleggDiv">
-		Teikn person til innlegg
-		<form data-bind="submit:addInnlegg">
-			<select id="typeInnlegg">
-				<option value="innlegg">Innlegg</option>
-				<option value="replikk">Replikk</option>
-				<option value="dagsorden">Til dagsorden</option>
-			</select>
-
-			<select id="innleggsHaldar"></select>
-			<button type="submit">Innteikn!</button>
-		</form>
+		<select style="display:none" id="innleggsHaldar"></select>
 	</div>
 
-	<div id="addPersonDiv">	
-		Legg til person p&aring; m&oslash;tet
-		<form data-bind="submit:addPerson">
-		<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
-			<input type="text" data-bind='value:newPersonName, valueUpdate: "afterkeydown"' placeholder="Namn" />
-			<select id="kjonnList">
-				<option value="K">Kvinne</option>
-				<option value="M">Mann</option>
-			</select>
-			<button type="submit" data-bind="enable: newPersonName().length > 0">Legg til person</button>
-		</form>
-	</div>
 	  
 	<p id="snakkarNoAvsnitt">Snakkar no: 
 		<strong>
@@ -64,23 +43,14 @@
 		<li>
 			<table>
 				<tr>
-					<td><span data-bind="text: speaker.name"></span></td>
-					<td>(<span data-bind="text: getType()"></span>)</td>
-					<td>
-						<a href="#" data-bind="click: $parent.maybeRemoveSpeaker">Stryk</a>
-						<a href="#" data-bind="click: $parent.flyttOppTrykka">Flytt opp</a>
-						<a href="#" data-bind="click: $parent.flyttNedTrykka">Flytt ned</a>
-					</td>
+					<td><span data-bind="text: speaker.name"></span></td> <td>(<span data-bind="text: getType()"></span>)</td>
 				</tr>
 			</table>
 		</li>
 	 </ul>
 
 	Andel jenter: <span data-bind='text: kjonnsprosent'></span><br />
-	Andel SST: <span data-bind="text: sstprosent"></span>
-	<div id="nesteDiv">
-		<button data-bind="click: nextSpeaker, enable: allItems().length > 0">Neste talar</button>
-	</div>
+	Andel SST: <span data-bind="text: sstprosent"></span><br /><br />
 
 	<em>Kven har snakka s&aring; langt?</em>
 	<ul data-bind="foreach: harSnakka">

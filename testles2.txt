@@ -1,4 +1,0 @@
-[{"speaker": "Marie", "type": "Innlegg", "timestamp": 1 },
-{"speaker": "Mads", "type": "Innlegg", "timestamp": 2 },
-{"speaker": "Andreas", "type": "Innlegg", "timestamp": 3 },
-{"speaker": "Seher", "type": "Innlegg", "timestamp": 4 }]

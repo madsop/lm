@@ -6,17 +6,13 @@ namespace.BetterListModel = function () {
 	var self = this;
 	this.newPersonName = ko.observable("");
 
-	this.hub = namespace.hub.create();
-	
-	var receiveSpeakerList = function () {
-		self.hub.onRefresh(receivePersonListFromServer);
-	};
+	var hub = namespace.hub.create();
 	
 	this.allPersons = {
-		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),
+/*		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),
 		Marie: namespace.Person.create({name:"Marie",kjonn:"K"}), 
 		Seher: namespace.Person.create({name:"Seher",kjonn:"K"}), 
-		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"})
+		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"}) */
 	};
 
 	this.activeSpeaker = ko.observable({speaker: {name: 'Pause'}, getType: function() { return 'mock'; }});
@@ -25,7 +21,7 @@ namespace.BetterListModel = function () {
 		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
 	}
 
-	var receivePersonListFromServer = function (receivedInnleggs, lastTimestamp) {
+	var receiveInnleggListFromServer = function (receivedInnleggs, lastTimestamp) {
 		var sortedList = _.sortBy(receivedInnleggs, function (person) { return person.timestamp; });
 		_.each(sortedList, function (receivedInnlegg) {
 			if (self.allPersons[receivedInnlegg.speaker.name] !== undefined) {
@@ -38,20 +34,29 @@ namespace.BetterListModel = function () {
 				}
 			}
 		});
+		oppdaterKjonnsfordeling();
+		oppdaterSSTprosent();
 	};
+	var receivePersonListFromServer = function (receivedPersons) {
+		var sortedList = _.sortBy(receivedPersons, function (person) { return person.name; });
+		_.each(sortedList, function (receivedPerson) {
+			self.allPersons[receivedPerson.name] = namespace.Person.create({name: receivedPerson.name, kjonn: receivedPerson.kjonn, verv: receivedPerson.verv});
+		});
+		fillSelect();
+	}
+	
+	hub.onRefresh(receiveInnleggListFromServer, receivePersonListFromServer);
 
-	receiveSpeakerList();
-
-	this.fillSelect = function () {
+	var fillSelect = function () {
 		var returnText = "";
-		_.each(this.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" +person.name +"</option>" } );	
+		_.each(self.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" +person.name +"</option>" } );	
 		document.getElementById('innleggsHaldar').innerHTML = returnText;
 	}
 
-	this.fillSelect();
+	fillSelect();
 	this.allItems = ko.observableArray([]); 
-	this.harSnakka = ko.observableArray([]);
-	this.kjonnsprosent = ko.observable("-");
+	this.harSnakka = ko.observableArray([]); this.kjonnsprosent = ko.observable("-");
+	this.sstprosent = ko.observable("-");
 	var sisteInnlegg = this.activeSpeaker();
 
 	this.addPerson = function () {
@@ -60,10 +65,14 @@ namespace.BetterListModel = function () {
 				name:this.newPersonName(),
 				kjonn:kjonnList.options[kjonnList.selectedIndex].text
 			});
-			this.allPersons[newPerson.name] = newPerson; 
-			this.fillSelect();
+			hub.nyPerson(newPerson);
 		}	
 		this.newPersonName(""); 
+	}
+
+	var nyPerson = function (newPerson) {
+		self.allPersons[newPerson.person.name] = newPerson.person;
+		fillSelect();
 	}
 
 	this.addInnlegg = function () {
@@ -82,14 +91,14 @@ namespace.BetterListModel = function () {
 			speaker:speaker
 		});
 
-		if (newInnlegg.getType() === "Til dagsorden") { //			this.allItems.splice(0,0,newInnlegg);
-			self.hub.tilDagsorden(newInnlegg);
+		if (newInnlegg.getType() === "Til dagsorden") { 
+			hub.tilDagsorden(newInnlegg);
 		}
 		else if (newInnlegg.getType() === "Replikk") {
-			self.hub.nyReplikk(newInnlegg);
+			hub.nyReplikk(newInnlegg);
 		}
 		else {
-			self.hub.nyttInnlegg(newInnlegg);
+			hub.nyttInnlegg(newInnlegg);
 		}	
 	};
 
@@ -108,37 +117,40 @@ namespace.BetterListModel = function () {
 	
 	this.flyttOppTrykka = function (innlegg) {
 		if (_.first(self.allItems()) !== innlegg){
-			self.hub.flyttOpp(innlegg);
+			hub.flyttOpp(innlegg);
 		}
 	}
 
-	var flyttOpp = function (innlegg2) {
+	var flyttInnlegg = function (innlegg2, opp) {
 		var innlegg = innlegg2.innlegg,
 		innlegg = _.find(self.allItems(), function (element) { return innlegg.id == element.id; });
 	        var index = _.indexOf(self.allItems(), innlegg);
 
-		if (index<1 || self.allItems()[index-1].type !== "Innlegg") { return; }
-		self.allItems()[index] = self.allItems()[index-1];
-		self.allItems()[index-1] = innlegg; 
+		if (opp){
+			if (index<1 || self.allItems()[index-1].type !== "Innlegg") { return; }
+			self.allItems()[index] = self.allItems()[index-1];
+			self.allItems()[index-1] = innlegg;
+		}
+		else {
+			if (index===self.allItems().length-1 || self.allItems()[index].getType() !== "Innlegg") { return; }
+			self.allItems()[index] = self.allItems()[index+1];
+			self.allItems()[index+1] = innlegg;
+		}
 		self.allItems.valueHasMutated();
-	};
+	}
+	
+	var flyttOpp = function (innlegg2) {
+		flyttInnlegg(innlegg2, true);
+	}
 
 	this.flyttNedTrykka = function (innlegg) {
 		if (_.last(self.allItems()) !== innlegg) {
-			self.hub.flyttNed(innlegg);
+			hub.flyttNed(innlegg);
 		}
 	}
 
 	var flyttNed = function (innlegg2) {
-		var innlegg = innlegg2.innlegg,
-		innlegg = _.find(self.allItems(), function (element) { return innlegg.id == element.id; });
-	        var index = _.indexOf(self.allItems(), innlegg);
-	
-		if (index===self.allItems().length-1 || self.allItems()[index].getType() !== "Innlegg") { return; }
-		
-		self.allItems()[index] = self.allItems()[index+1];
-		self.allItems()[index+1] = innlegg;
-		self.allItems.valueHasMutated();
+		flyttInnlegg(innlegg2, false);
 	}
 
 	var nyReplikk = function (newReplikk) {
@@ -167,23 +179,26 @@ namespace.BetterListModel = function () {
 
 	this.maybeRemoveSpeaker = function (speaker) {
 		if (confirm("Er du sikker på at du vil stryke " +speaker.speakerName() +"?")) { 
-			self.hub.stryk(speaker.id);
+			hub.stryk(speaker.id);
 		}
 	};
 
-	this.nextSpeaker = function (lastTimestamp) {
-		lastTimestamp = lastTimestamp || self.activeSpeaker().id;
+	this.nextSpeaker = function () {
+		hub.nesteTalar(self.activeSpeaker().id);
+	};
+
+	var nesteTalar = function () {
 		if (self.activeSpeaker().getType() !== 'mock') { 
 			self.harSnakka.push(self.activeSpeaker());
 			oppdaterKjonnsfordeling();
+			oppdaterSSTprosent();
 		}
 		self.activeSpeaker(_.first(self.allItems()));
 		self.allItems.splice(0,1);
 		namespace.reset(self.activeSpeaker(), self.harSnakka());
 		new namespace.Timer(self.activeSpeaker());
 		if (self.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = self.activeSpeaker(); }
-		self.hub.nesteTalar(self.activeSpeaker().id);
-	};
+	}
 
 	var oppdaterKjonnsfordeling = function () {
 		var temp = _.countBy(self.harSnakka(), function (speakers) {
@@ -195,16 +210,27 @@ namespace.BetterListModel = function () {
 
 		self.kjonnsprosent(((temp.K / (temp.M + temp.K))*100).toFixed(1) + "%"); 
 	}
-
+	
+	var oppdaterSSTprosent = function () {
+		var temp = _.countBy(self.harSnakka(),function (speaker) {
+			if (speaker === undefined) { return; }
+			return speaker.speaker.verv;
+		});
+		temp.SST = temp.SST || 0;
+		temp.LS = temp.LS || 0;
+		
+		self.sstprosent( (temp.SST/(self.harSnakka().length) * 100).toFixed(1) +"%");
+	}
 	var subscribe = function () {	
-		self.hub.subscribe('/nesteTalar', function (a) { /*console.log(a);*/ });
-		self.hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
-		self.hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
-		self.hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
-		self.hub.subscribe('/tilDagsorden', function (innlegg) { tilDagsorden(innlegg); });
-		self.hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
-		self.hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
-		self.hub.subscribe('/nyttInnleggId', function (innlegg) {
+		hub.subscribe('/nesteTalar', function () { nesteTalar(); });
+		hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
+		hub.subscribe('/nyPerson', function (person) { nyPerson(person); });
+		hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
+		hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
+		hub.subscribe('/tilDagsorden', function (innlegg) { tilDagsorden(innlegg); });
+		hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
+		hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
+		hub.subscribe('/nyttInnleggId', function (innlegg) {
 			var innleggUtanId = _.find(self.allItems(), function (element) { return element.id == undefined; });
 			innleggUtanId.setId(innlegg.id); 
 		});

@@ -28,6 +28,7 @@ var LM = LM || {};
 			publish('/tilDagsorden', {innlegg: innlegg});
 		},
 		nyPerson: function (person) {
+			publish('/nyPerson', {person: person});
 		},
 		nesteTalar: function (timestamp) {
 			publish('/nesteTalar', {timestamp: timestamp});
@@ -44,14 +45,24 @@ var LM = LM || {};
 		subscribe: function (keyword, callback) {
 			sub(keyword, callback);
 		},
-		onRefresh: function (callback) {
+		onRefresh: function (callback1, callback2) {
+			$.ajax({
+				url: hostURL +'/lm/personliste',
+				dataType: 'jsonp',
+				data: {},
+				success: function (response){
+					var resp = response.response;
+					callback2(resp);
+				},
+				error: function (xhr, error) {}
+			});
 			$.ajax({
 				url: hostURL +'/lm/taleliste',
 				dataType: 'jsonp',
 				data: { },
 				success: function (response) {
 					var resp = response.response;
-					callback(resp, response.lastSpeaker);
+					callback1(resp, response.lastSpeaker);
 				},
 				error: function (xhr, error) {
 					alert(xhr.status + error);
@@ -60,5 +71,6 @@ var LM = LM || {};
 				}
 			});
 		}
+	
 	};	
 }(LM));
