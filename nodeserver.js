@@ -5,6 +5,7 @@ var express = require('express'),
 	readline = require('readline'),
 	fs = require('fs'),
 	_ = require('lodash');
+var common = require('./src/common/common.js');
 
 var bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45});
 
@@ -150,7 +151,6 @@ namespace.Server = function () {
 		if (!(_.find(heileTalelista, function (obj) { return obj.type === "Svarreplikk";}))) {
 			var originalInnlegget  = _.find(heileTalelista, function (element) { return element.type=='Innlegg';});
 			var svarreplikk = {type:'Svarreplikk', speaker: originalInnlegget.speaker, id: nyInnleggsId()};
-			console.log("id: " + svarreplikk.id); 
 			heileTalelista.splice(count,0, svarreplikk);
 			client.publish('/nyttInnleggId', {id: svarreplikk.id});
 		}
@@ -162,26 +162,9 @@ namespace.Server = function () {
 		filhandtering.lagreTaleliste(heileTalelista);
 	}
 
-	var flyttInnlegg = function (innlegg, opp) {
-		var object = _.find(heileTalelista, function (element) { return innlegg.id == element.id; });
-		var index = _.indexOf(heileTalelista, object);
-		if (opp) {
-			heileTalelista[index] = heileTalelista[index-1];
-			heileTalelista[index-1] = object;
-		}
-		else {
-			heileTalelista[index] = heileTalelista[index+1];
-			heileTalelista[index+1] = object;
-		}
+	var flytt = function (innlegg, opp) {
+		common.flyttInnlegg(innlegg, opp, heileTalelista);
 		filhandtering.lagreTaleliste(heileTalelista);
-	}
-
-	var flyttOpp = function (innlegg) {
-		flyttInnlegg(innlegg, true);
-	}
-
-	var flyttNed = function (innlegg) {
-		flyttInnlegg(innlegg, false);
 	}
 
 	var tilDagsorden = function (innlegg) {
@@ -217,10 +200,10 @@ namespace.Server = function () {
 				nyReplikk(data.replikk);
 				break;
 			case '/flyttOpp':
-				flyttOpp(data.innlegg);
+				flytt(data.innlegg, true);
 				break;
 			case '/flyttNed':
-				flyttNed(data.innlegg);
+				flytt(data.innlegg, false);
 				break;
 			case '/tilDagsorden':
 				tilDagsorden(data.innlegg);

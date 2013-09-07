@@ -122,35 +122,15 @@ namespace.BetterListModel = function () {
 	}
 
 	var flyttInnlegg = function (innlegg2, opp) {
-		var innlegg = innlegg2.innlegg,
-		innlegg = _.find(self.allItems(), function (element) { return innlegg.id == element.id; });
-	        var index = _.indexOf(self.allItems(), innlegg);
-
-		if (opp){
-			if (index<1 || self.allItems()[index-1].type !== "Innlegg") { return; }
-			self.allItems()[index] = self.allItems()[index-1];
-			self.allItems()[index-1] = innlegg;
-		}
-		else {
-			if (index===self.allItems().length-1 || self.allItems()[index].getType() !== "Innlegg") { return; }
-			self.allItems()[index] = self.allItems()[index+1];
-			self.allItems()[index+1] = innlegg;
-		}
+		var innlegg = innlegg2.innlegg;
+		namespace.flyttInnlegg(innlegg, opp, self.allItems());
 		self.allItems.valueHasMutated();
 	}
 	
-	var flyttOpp = function (innlegg2) {
-		flyttInnlegg(innlegg2, true);
-	}
-
 	this.flyttNedTrykka = function (innlegg) {
 		if (_.last(self.allItems()) !== innlegg) {
 			hub.flyttNed(innlegg);
 		}
-	}
-
-	var flyttNed = function (innlegg2) {
-		flyttInnlegg(innlegg2, false);
 	}
 
 	var nyReplikk = function (newReplikk) {
@@ -226,8 +206,8 @@ namespace.BetterListModel = function () {
 		hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
 		hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
 		hub.subscribe('/tilDagsorden', function (innlegg) { tilDagsorden(innlegg); });
-		hub.subscribe('/flyttOpp', function (innlegg) { flyttOpp(innlegg); });
-		hub.subscribe('/flyttNed', function (innlegg) { flyttNed(innlegg); });
+		hub.subscribe('/flyttOpp', function (innlegg) { flyttInnlegg(innlegg, true); });
+		hub.subscribe('/flyttNed', function (innlegg) { flyttInnlegg(innlegg, false); });
 		hub.subscribe('/nyttInnleggId', function (innlegg) {
 			var innleggUtanId = _.find(self.allItems(), function (element) { return element.id == undefined; });
 			innleggUtanId.setId(innlegg.id); 
