@@ -15,7 +15,7 @@ namespace.BetterListModel = function () {
 		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"}) */
 	};
 
-	this.activeSpeaker = ko.observable({speaker: {name: 'Pause'}, getType: function() { return 'mock'; }});
+	this.activeSpeaker = ko.observable(/*{speaker: {name: 'Pause'}, getType: function() { return 'mock'; }}*/);
 
 	var lagInnleggsobjekt = function (receivedInnlegg) {
 		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
@@ -184,15 +184,13 @@ namespace.BetterListModel = function () {
 	};
 
 	this.nextSpeaker = function () {
-		hub.nesteTalar(self.activeSpeaker().id);
+		self.activeSpeaker() ? 	hub.nesteTalar(self.activeSpeaker().id) : hub.nesteTalar(_.first(self.allItems()));
 	};
 
 	var nesteTalar = function () {
-		if (self.activeSpeaker().getType() !== 'mock') { 
-			self.harSnakka.push(self.activeSpeaker());
-			oppdaterKjonnsfordeling();
-			oppdaterSSTprosent();
-		}
+		if (self.activeSpeaker() !== undefined) {self.harSnakka.push(self.activeSpeaker());}
+		oppdaterKjonnsfordeling();
+		oppdaterSSTprosent();
 		self.activeSpeaker(_.first(self.allItems()));
 		self.allItems.splice(0,1);
 		namespace.reset(self.activeSpeaker(), self.harSnakka());

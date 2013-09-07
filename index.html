@@ -52,11 +52,11 @@
 	  
 	<p id="snakkarNoAvsnitt">Snakkar no: 
 		<strong>
-			<span data-bind="text: activeSpeaker().speaker.name"></span>
-			(<span data-bind="text: activeSpeaker().type"></span>)
+			<span data-bind="text: activeSpeaker() ? activeSpeaker().speaker.name : ''"></span>
+			(<span data-bind="text: activeSpeaker() ? activeSpeaker().type : ''"></span>)
 		</strong>
 		<span id='snakkande'></span>
-		<span data-bind"text: activeSpeaker().taletid()"></span>
+		<span data-bind"text: activeSpeaker() ? activeSpeaker().taletid() : ''"></span>
 	</p>
 
 	<strong>Taleliste:</strong>
