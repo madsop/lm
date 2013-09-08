@@ -8,7 +8,7 @@ namespace.BetterListModel = function () {
 	this.harSnakka, this.kjonnsprosent, this.sstprosent, this.allItems, this.allPersons, this.newPersonName, this.activeSpeaker;
 
 	var lagInnleggsobjekt = function (receivedInnlegg) {
-		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
+		return namespace.Innlegg.create(receivedInnlegg);
 	}
 
 	var fillSelect = function () {
@@ -35,9 +35,7 @@ namespace.BetterListModel = function () {
 	};
 	var receivePersonListFromServer = function (receivedPersons) {
 		var sortedList = _.sortBy(receivedPersons, function (person) { return person.name; });
-		_.each(sortedList, function (receivedPerson) {
-			self.allPersons[receivedPerson.name] = namespace.Person.create({name: receivedPerson.name, kjonn: receivedPerson.kjonn, verv: receivedPerson.verv});
-		});
+		_.each(sortedList, function (receivedPerson) { self.allPersons[receivedPerson.name] = namespace.Person.create(receivedPerson); });
 		fillSelect();
 	}
 
@@ -45,7 +43,8 @@ namespace.BetterListModel = function () {
 		if (this.newPersonName() !== "") { 
 			var newPerson = namespace.Person.create({
 				name:this.newPersonName(),
-				kjonn:kjonnList.options[kjonnList.selectedIndex].text
+				kjonn:kjonnList.options[kjonnList.selectedIndex].text,
+				verv:vervList.options[vervList.selectedIndex].text
 			});
 			hub.nyPerson(newPerson);
 		}	
@@ -147,7 +146,6 @@ namespace.BetterListModel = function () {
 	var taltTid = function () {
    		var periods = $('#countdown').countdown('getTimes');
 		if (periods === null) { return '-'; }
-		// finn ut her korleis trekke frå utgangspunktet
 		var inSeconds = $.countdown.periodsToSeconds(periods);
 		var diff = self.activeSpeaker().taletid(self.harSnakka()) - inSeconds;
 		return Math.floor(diff/60) +':' + (diff % 60); 
