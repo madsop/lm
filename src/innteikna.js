@@ -58,6 +58,76 @@ var LM = this.LM || {};
             fillSelect();
         }
 
+        function nyPerson(newPerson) {
+            self.allPersons[newPerson.person.name] = newPerson.person;
+            fillSelect();
+        }
+
+        function nyttInnlegg(innlegg) {
+            self.allItems.push(lagInnleggsobjekt(innlegg.innlegg));
+        }
+
+        function tilDagsorden(innlegg) {
+            if (_.first(self.allItems()).type !== "Til dagsorden") {
+                self.allItems.unshift(innlegg);
+            } else {
+                var indexToPutObject = _.find(self.allItems(), function (element) { return element.type !== "Til dagsorden"; });
+                self.allItems.splice(_.indexOf(self.allItems(), indexToPutObject), 0, lagInnleggsobjekt(innlegg.innlegg));
+            }
+        }
+
+        function flyttInnlegg(innlegg2, opp) {
+            var innlegg = innlegg2.innlegg;
+            namespace.flyttInnlegg(innlegg, opp, self.allItems());
+            self.allItems.valueHasMutated();
+        }
+
+        function nyReplikk(newReplikk) {
+            // legg inn replikk etter siste replikk eller første innlegg
+            if (self.activeSpeaker().getType() === "Svarreplikk") { return; }
+            var count = 0,
+                itemInList = self.allItems()[count];
+            while (itemInList !== null && (itemInList.getType() !== "Innlegg" && itemInList.getType() !== "Svarreplikk")) {
+                count += 1;
+                itemInList = self.allItems()[count];
+            }
+
+            //svarreplikk
+            if (!(_.find(self.allItems(), function (obj) { return obj.getType() === "Svarreplikk"; }))) {
+                self.allItems.splice(count, 0, namespace.Innlegg.create({speaker: sisteInnlegg.speaker, type: "Svarreplikk"}));
+            }
+
+            // legg til innlegg i liste
+            self.allItems.splice(count, 0, lagInnleggsobjekt(newReplikk.replikk));
+        }
+
+        function strykInnlegg(innleggId) {
+            var innlegget = _.find(self.allItems(), function (innlegg) { return innlegg.id === innleggId.innlegg; });
+            self.allItems.remove(innlegget);
+        }
+
+        function taltTid() {
+            var periods = $('#countdown').countdown('getTimes'),
+                inSeconds,
+                diff;
+            if (periods === null) { return '-'; }
+            inSeconds = $.countdown.periodsToSeconds(periods);
+            diff = self.activeSpeaker().taletid(self.harSnakka()) - inSeconds;
+            return Math.floor(diff / 60) + ':' + (diff % 60);
+        }
+
+        function nesteTalar() {
+            if (self.activeSpeaker() !== undefined) {self.harSnakka.push(self.activeSpeaker()); }
+            oppdaterKjonnsfordeling();
+            oppdaterSSTprosent();
+            self.activeSpeaker(_.first(self.allItems()));
+            self.allItems.splice(0, 1);
+            if (self.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = self.activeSpeaker(); }
+            var taletid = self.activeSpeaker().taletid(self.harSnakka());
+            $('#countdown').countdown('destroy');
+            $('#countdown').countdown({until: +taletid, layout: '{mn}:{sn}'});
+        }
+
         this.addPerson = function () {
             if (this.newPersonName() !== "") {
                 var newPerson = namespace.Person.create({
@@ -70,10 +140,27 @@ var LM = this.LM || {};
             this.newPersonName("");
         };
 
-        function nyPerson(newPerson) {
-            self.allPersons[newPerson.person.name] = newPerson.person;
-            fillSelect();
-        }
+        this.nextSpeaker = function () {
+            hub.nesteTalar(taltTid());
+        };
+
+        this.maybeRemoveSpeaker = function (speaker) {
+            if (confirm("Er du sikker på at du vil stryke " + speaker.speakerName() + "?")) {
+                hub.stryk(speaker.id);
+            }
+        };
+
+        this.flyttNedTrykka = function (innlegg) {
+            if (_.last(self.allItems()) !== innlegg) {
+                hub.flyttNed(innlegg);
+            }
+        };
+
+        this.flyttOppTrykka = function (innlegg) {
+            if (_.first(self.allItems()) !== innlegg) {
+                hub.flyttOpp(innlegg);
+            }
+        };
 
         this.addInnlegg = function () {
             var selectList = document.getElementById("typeInnlegg"),
@@ -100,93 +187,6 @@ var LM = this.LM || {};
                 hub.nyttInnlegg(newInnlegg);
             }
         };
-
-        function nyttInnlegg(innlegg) {
-            self.allItems.push(lagInnleggsobjekt(innlegg.innlegg));
-        }
-
-        function tilDagsorden(innlegg) {
-            if (_.first(self.allItems()).type !== "Til dagsorden") {
-                self.allItems.unshift(innlegg);
-            } else {
-                var indexToPutObject = _.find(self.allItems(), function (element) { return element.type !== "Til dagsorden"; });
-                self.allItems.splice(_.indexOf(self.allItems(), indexToPutObject), 0, lagInnleggsobjekt(innlegg.innlegg));
-            }
-        }
-
-        this.flyttOppTrykka = function (innlegg) {
-            if (_.first(self.allItems()) !== innlegg) {
-                hub.flyttOpp(innlegg);
-            }
-        };
-
-        function flyttInnlegg(innlegg2, opp) {
-            var innlegg = innlegg2.innlegg;
-            namespace.flyttInnlegg(innlegg, opp, self.allItems());
-            self.allItems.valueHasMutated();
-        }
-
-        this.flyttNedTrykka = function (innlegg) {
-            if (_.last(self.allItems()) !== innlegg) {
-                hub.flyttNed(innlegg);
-            }
-        };
-
-        function nyReplikk(newReplikk) {
-            // legg inn replikk etter siste replikk eller første innlegg
-            if (self.activeSpeaker().getType() === "Svarreplikk") { return; }
-            var count = 0,
-                itemInList = self.allItems()[count];
-            while (itemInList !== null && (itemInList.getType() !== "Innlegg" && itemInList.getType() !== "Svarreplikk")) {
-                count += 1;
-                itemInList = self.allItems()[count];
-            }
-
-            //svarreplikk
-            if (!(_.find(self.allItems(), function (obj) { return obj.getType() === "Svarreplikk"; }))) {
-                self.allItems.splice(count, 0, namespace.Innlegg.create({speaker: sisteInnlegg.speaker, type: "Svarreplikk"}));
-            }
-
-            // legg til innlegg i liste
-            self.allItems.splice(count, 0, lagInnleggsobjekt(newReplikk.replikk));
-        }
-
-        function strykInnlegg(innleggId) {
-            var innlegget = _.find(self.allItems(), function (innlegg) { return innlegg.id === innleggId.innlegg; });
-            self.allItems.remove(innlegget);
-        }
-
-        this.maybeRemoveSpeaker = function (speaker) {
-            if (confirm("Er du sikker på at du vil stryke " + speaker.speakerName() + "?")) {
-                hub.stryk(speaker.id);
-            }
-        };
-
-        function taltTid() {
-            var periods = $('#countdown').countdown('getTimes'),
-                inSeconds,
-                diff;
-            if (periods === null) { return '-'; }
-            inSeconds = $.countdown.periodsToSeconds(periods);
-            diff = self.activeSpeaker().taletid(self.harSnakka()) - inSeconds;
-            return Math.floor(diff / 60) + ':' + (diff % 60);
-        }
-
-        this.nextSpeaker = function () {
-            hub.nesteTalar(taltTid());
-        };
-
-        function nesteTalar() {
-            if (self.activeSpeaker() !== undefined) {self.harSnakka.push(self.activeSpeaker()); }
-            oppdaterKjonnsfordeling();
-            oppdaterSSTprosent();
-            self.activeSpeaker(_.first(self.allItems()));
-            self.allItems.splice(0, 1);
-            if (self.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = self.activeSpeaker(); }
-            var taletid = self.activeSpeaker().taletid(self.harSnakka());
-            $('#countdown').countdown('destroy');
-            $('#countdown').countdown({until: +taletid, layout: '{mn}:{sn}'});
-        }
 
         function subscribe() {
             hub.subscribe('/nesteTalar', function () { nesteTalar(); });
