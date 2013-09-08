@@ -4,23 +4,19 @@ var LM = LM || {};
 "use strict";
 namespace.BetterListModel = function () {
 	var self = this;
-	this.newPersonName = ko.observable("");
-
-	var hub = namespace.hub.create();
-	
-	this.allPersons = {
-/*		Mads: namespace.Person.create({name:"Mads",kjonn:"M"}),
-		Marie: namespace.Person.create({name:"Marie",kjonn:"K"}), 
-		Seher: namespace.Person.create({name:"Seher",kjonn:"K"}), 
-		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"}) */
-	};
-
-	this.activeSpeaker = ko.observable();
+	var hub, sisteInnlegg;
+	this.harSnakka, this.kjonnsprosent, this.sstprosent, this.allItems, this.allPersons, this.newPersonName, this.activeSpeaker;
 
 	var lagInnleggsobjekt = function (receivedInnlegg) {
 		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
 	}
 
+	var fillSelect = function () {
+		var returnText = "";
+		_.each(self.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" +person.name +"</option>" } );	
+		document.getElementById('innleggsHaldar').innerHTML = returnText;
+	}
+	
 	var receiveInnleggListFromServer = function (receivedInnleggs, lastTimestamp) {
 		var sortedList = _.sortBy(receivedInnleggs, function (person) { return person.timestamp; });
 		_.each(sortedList, function (receivedInnlegg) {
@@ -44,20 +40,6 @@ namespace.BetterListModel = function () {
 		});
 		fillSelect();
 	}
-	
-	hub.onRefresh(receiveInnleggListFromServer, receivePersonListFromServer);
-
-	var fillSelect = function () {
-		var returnText = "";
-		_.each(self.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" +person.name +"</option>" } );	
-		document.getElementById('innleggsHaldar').innerHTML = returnText;
-	}
-
-	fillSelect();
-	this.allItems = ko.observableArray([]); 
-	this.harSnakka = ko.observableArray([]); this.kjonnsprosent = ko.observable("-");
-	this.sstprosent = ko.observable("-");
-	var sisteInnlegg = this.activeSpeaker();
 
 	this.addPerson = function () {
 		if (this.newPersonName() !== "") { 
@@ -162,9 +144,17 @@ namespace.BetterListModel = function () {
 			hub.stryk(speaker.id);
 		}
 	};
+	var taltTid = function () {
+   		var periods = $('#countdown').countdown('getTimes');
+		if (periods === null) { return '-'; }
+		// finn ut her korleis trekke frå utgangspunktet
+		var inSeconds = $.countdown.periodsToSeconds(periods);
+		var diff = self.activeSpeaker().taletid(self.harSnakka()) - inSeconds;
+		return Math.floor(diff/60) +':' + (diff % 60); 
+	} 
 
 	this.nextSpeaker = function () {
-		self.activeSpeaker() ? 	hub.nesteTalar(self.activeSpeaker().id) : hub.nesteTalar(_.first(self.allItems()));
+		hub.nesteTalar(taltTid());
 	};
 
 	var nesteTalar = function () {
@@ -200,6 +190,7 @@ namespace.BetterListModel = function () {
 		
 		self.sstprosent( (temp.SST/(self.harSnakka().length) * 100).toFixed(1) +"%");
 	}
+
 	var subscribe = function () {	
 		hub.subscribe('/nesteTalar', function () { nesteTalar(); });
 		hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
@@ -213,17 +204,29 @@ namespace.BetterListModel = function () {
 			var innleggUtanId = _.find(self.allItems(), function (element) { return element.id == undefined; });
 			innleggUtanId.setId(innlegg.id); 
 		});
-	}();
+		$('#pauseButton').click(function () {
+			if ($(this).text() == 'Pause'){
+				$(this).text('Resume');
+				$('#countdown').countdown('pause');
+			}
+			else {
+				$(this).text('Pause');
+				$('#countdown').countdown('resume'); } });
+	}
 
-	$('#pauseButton').click(function () {
-		if ($(this).text() == 'Pause'){
-			$(this).text('Resume');
-			$('#countdown').countdown('pause');
-		}
-		else {
-			$(this).text('Pause');
-			$('#countdown').countdown('resume');
-		}
-	});
+	var init = function() {
+		self.allPersons = {};
+		self.activeSpeaker = ko.observable();
+		self.newPersonName = ko.observable("");
+		self.harSnakka = ko.observableArray([]); 
+		self.kjonnsprosent = ko.observable("-");
+		self.sstprosent = ko.observable("-");
+		self.allItems = ko.observableArray([]); 
+		sisteInnlegg = self.activeSpeaker();
+ 		hub = namespace.hub.create();
+		hub.onRefresh(receiveInnleggListFromServer, receivePersonListFromServer);
+		fillSelect();
+		subscribe();
+	}();
 };
 }(LM));

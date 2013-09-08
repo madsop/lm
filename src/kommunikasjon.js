@@ -30,8 +30,8 @@ var LM = LM || {};
 		nyPerson: function (person) {
 			publish('/nyPerson', {person: person});
 		},
-		nesteTalar: function (timestamp) {
-			publish('/nesteTalar', {timestamp: timestamp});
+		nesteTalar: function (taltTid) {
+			publish('/nesteTalar', {taltTid: taltTid});
 		},
 		flyttOpp: function (innlegg) {
 			publish('/flyttOpp', {innlegg: innlegg});

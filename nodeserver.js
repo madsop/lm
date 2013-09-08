@@ -3,8 +3,7 @@ var LM = LM || {};
 var express = require('express'),
 	faye = require('faye'),
 	readline = require('readline'),
-	fs = require('fs'),
-	_ = require('lodash');
+	fs = require('fs'), _ = require('lodash');
 var common = require('./src/common/common.js');
 
 var bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45});
@@ -57,7 +56,7 @@ namespace.Filhandtering = function () {
 	var writeFile = function (filename, data) {
 		fs.writeFile(filename, data, function (err) {
 			if (err) throw err;
-			console.log('Lagra fil ' +filename + ' med ' + data);
+//			console.log('Lagra fil ' +filename + ' med ' + data);
 		});
 	}
 	
@@ -115,9 +114,11 @@ namespace.Server = function () {
 	this.getPersonlista = function () { return personar; }
 	this.getTimestamp = function () { return timestampCounter; }
 	
-	var nesteTalar = function (data){
+	var nesteTalar = function (taltTid){
+		if (heileTalelista[timestampCounter-1] !== undefined) { heileTalelista[timestampCounter-1].talttid = taltTid; }
 		timestampCounter += 1;
 		filhandtering.lagreTimestamp(timestampCounter);
+		filhandtering.lagreTaleliste(heileTalelista);
 	}
 	var stryk = function (innleggId) {
 		if (innleggId <= timestampCounter) { return; } 
@@ -139,8 +140,7 @@ namespace.Server = function () {
 		return maksId + 1;
 	}
 
-	var nyReplikk = function (replikk) {
-		if (heileTalelista[timestampCounter-1] !== undefined && heileTalelista[timestampCounter-1].type === "Svarreplikk") { return; }
+	var nyReplikk = function (replikk) { if (heileTalelista[timestampCounter-1] !== undefined && heileTalelista[timestampCounter-1].type === "Svarreplikk") { return; }
 		var count = timestampCounter; 
 		var itemInList = heileTalelista[count]; while (itemInList != null && ( itemInList.type !== "Innlegg" && itemInList.type !== "Svarreplikk" ) ) {
 			count++;
@@ -188,7 +188,7 @@ namespace.Server = function () {
 	bayeux.bind('publish', function(clientId, channel, data) {
 		switch (channel) {
 			case '/nesteTalar':
-				nesteTalar(data);
+				nesteTalar(data.taltTid);
 				break;
 			case '/stryk':
 				stryk(data.innlegg);
