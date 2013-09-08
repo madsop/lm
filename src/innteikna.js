@@ -15,7 +15,7 @@ namespace.BetterListModel = function () {
 		Andreas: namespace.Person.create({name:"Andreas",kjonn:"M"}) */
 	};
 
-	this.activeSpeaker = ko.observable(/*{speaker: {name: 'Pause'}, getType: function() { return 'mock'; }}*/);
+	this.activeSpeaker = ko.observable();
 
 	var lagInnleggsobjekt = function (receivedInnlegg) {
 		return namespace.Innlegg.create({type:receivedInnlegg.type, speaker: receivedInnlegg.speaker, id: receivedInnlegg.id});
@@ -173,9 +173,10 @@ namespace.BetterListModel = function () {
 		oppdaterSSTprosent();
 		self.activeSpeaker(_.first(self.allItems()));
 		self.allItems.splice(0,1);
-		namespace.reset(self.activeSpeaker(), self.harSnakka());
-		new namespace.Timer(self.activeSpeaker());
 		if (self.activeSpeaker().getType() === "Innlegg") { sisteInnlegg = self.activeSpeaker(); }
+		var taletid = self.activeSpeaker().taletid(self.harSnakka());
+		$('#countdown').countdown('destroy');
+		$('#countdown').countdown({until: +taletid, layout: '{mn}:{sn}'});
 	}
 
 	var oppdaterKjonnsfordeling = function () {
@@ -213,5 +214,16 @@ namespace.BetterListModel = function () {
 			innleggUtanId.setId(innlegg.id); 
 		});
 	}();
+
+	$('#pauseButton').click(function () {
+		if ($(this).text() == 'Pause'){
+			$(this).text('Resume');
+			$('#countdown').countdown('pause');
+		}
+		else {
+			$(this).text('Pause');
+			$('#countdown').countdown('resume');
+		}
+	});
 };
 }(LM));

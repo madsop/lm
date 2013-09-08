@@ -5,7 +5,8 @@ var LM = LM || {};
 	var beregnTaletid = function (innlegg, harSnakka) {
 			if (innlegg.type === "Innlegg"){
 				var speakers = _.pluck(harSnakka, 'speaker');
-				if (_.contains(speakers, innlegg.speaker)) {
+				var speakernames = _.pluck(speakers, 'name');
+				if (_.contains(speakernames, innlegg.speaker.name)) {
 					return 120;
 				}
 				else {
