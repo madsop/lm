@@ -10,7 +10,31 @@ var LM = this.LM || {};
         common = require('./src/common/common.js'),
         bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45}),
         app = express(),
+        passport = require('passport'),
+        localStrategy = require('passport-local').Strategy,
+        users = [ {username: 'a', password: 'b'} ],
         model = null;
+
+        passport.use(new localStrategy(
+            function(usern, password, done) {
+                if (usern!==users[0].username || password !==users[0].password) { return done(null, false); }
+                return done(null, users[0]);
+/*                var userlist =  _.where(users, {username: usern});
+                function (err, user) {
+                    if (err) { return done(err); }
+                    if (!user) {
+                        return done(null, false, { message: 'Incorrect username.' });
+                    }
+                    if (!user.validPassword(password)) {
+                        return done(null, false, { message: 'Incorrect password.' });
+                    }
+                   return done(null, user);
+                });*/
+            }  
+       ));
+
+    app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
+
 
     /*jslint unparam: true*/
     app.all('/*', function (req, res, next) {
@@ -28,6 +52,8 @@ var LM = this.LM || {};
         app.use(express.methodOverride());
         app.use(app.router);
         app.use(bayeux);
+        app.use(passport.initialize());
+        app.use(passport.session());
     /*  app.use(function (req, res, next) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         console.log(req);
