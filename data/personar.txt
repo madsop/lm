@@ -1,1 +1,1 @@
-[{"name":"Mads","kjonn":"M", "verv":"SST"},{"name":"Marie","kjonn":"K", "verv":""},{"name":"Seher","kjonn":"K", "verv":"SST"},{"name":"Andreas","kjonn":"M", "verv":"LS"}]
+[{"name":"A","kjonn":"Kvinne","verv":"SST"},{"name":"B","kjonn":"Kvinne","verv":"SST"},{"name":"AvC","kjonn":"Mann","verv":"-"}]

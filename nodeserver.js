@@ -1,232 +1,234 @@
-var LM = LM || {};
-
-var express = require('express'),
-	faye = require('faye'),
-	readline = require('readline'),
-	fs = require('fs'), _ = require('lodash');
-var common = require('./src/common/common.js');
-
-var bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45});
-
-var app = express();
-
-
-app.all('/*', function(req, res, next) {
-//  console.log(res);
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Pragma, Content-Type");
-  next();
- });
-
-app.configure(function(){
-//  app.set('views', __dirname + '/views');
-//  app.set('view engine', 'jade');
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
-  app.use(app.router);
-  app.use(bayeux);
-/*  app.use(function(req, res, next) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    console.log(req);
-    return next();
-  }); */
- // app.use(express.static(__dirname + '/client_dependencies'));
-//  app.use(express.static(__dirname + '/public'));
-//  app.use(express.static(__dirname + '/lib'));
-});
- 
-
-app.configure('development', function(){
-  app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
-});
-
-app.configure('production', function(){
-  app.use(express.errorHandler());
-});
-
-// SETUP FERDIG HER
+var LM = this.LM || {};
 
 (function (namespace) {
+    "use strict";
 
-namespace.Filhandtering = function () {
-	var timestampFilnamn = 'data/timestamp.txt';
-	var tekstfilNamn = 'data/testles.txt';
-	var personFilnamn = 'data/personar.txt';
-	
-	var writeFile = function (filename, data) {
-		fs.writeFile(filename, data, function (err) {
-			if (err) throw err;
-//			console.log('Lagra fil ' +filename + ' med ' + data);
-		});
-	}
-	
-	this.lagreTaleliste = function (taleliste) {
-		writeFile(tekstfilNamn, JSON.stringify(taleliste));
-	}
-	this.lagreTimestamp = function (counter) {
-		writeFile(timestampFilnamn, counter);
-	}
-	this.lagrePersonar = function (personar) {
-		writeFile(personFilnamn, JSON.stringify(personar));
-	}
+    var express = require('express'),
+        faye = require('faye'),
+        fs = require('fs'),
+        _ = require('lodash'),
+        common = require('./src/common/common.js'),
+        bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45}),
+        app = express(),
+        model = null;
 
-	this.lesTimestamp = function () {
-		if (fs.existsSync(timestampFilnamn)) {
-			return parseInt(fs.readFileSync(timestampFilnamn));
-		}
-		else {
-			fs.writeFile(timestampFilnamn, "");
-			return 0; 
-		}
-	}
+    /*jslint unparam: true*/
+    app.all('/*', function (req, res, next) {
+    //  console.log(res);
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Pragma, Content-Type");
+        next();
+    });
+    /*jslint unparam: false*/
 
-	var lesInnListe = function (filnamn) {
-		if (fs.existsSync(filnamn)) {
-			return JSON.parse(fs.readFileSync(filnamn));
-		}
-		else {
-			fs.writeFile(filnamn, "[]");
-			return JSON.parse("[]");
-		}
-	}
+    app.configure(function () {
+    //  app.set('views', __dirname + '/views');
+    //  app.set('view engine', 'jade');
+        app.use(express.bodyParser());
+        app.use(express.methodOverride());
+        app.use(app.router);
+        app.use(bayeux);
+    /*  app.use(function (req, res, next) {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        console.log(req);
+        return next();
+      }); */
+     // app.use(express.static(__dirname + '/client_dependencies'));
+    //  app.use(express.static(__dirname + '/public'));
+    //  app.use(express.static(__dirname + '/lib'));
+    });
 
-	this.lesInnTaleliste = function () {
-		return lesInnListe(tekstfilNamn);
-	}
-	
-	this.lesInnPersonar = function () {
-		return lesInnListe(personFilnamn)
-	}
-}
+    app.configure('development', function () {
+        app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+    });
 
-namespace.Server = function () {
-	var filhandtering = new namespace.Filhandtering();
+    app.configure('production', function () {
+        app.use(express.errorHandler());
+    });
 
-	client = bayeux.getClient();
+    // SETUP FERDIG HER
 
-	var timestampCounter = filhandtering.lesTimestamp();
+    namespace.Filhandtering = function () {
+        var timestampFilnamn = 'data/timestamp.txt',
+            tekstfilNamn = 'data/testles.txt',
+            personFilnamn = 'data/personar.txt';
+        function writeFile(filename, data) {
+            fs.writeFile(filename, data, function (err) {
+                if (err) { throw err; }
+            //            console.log('Lagra fil ' +filename + ' med ' + data);
+            });
+        }
 
-	var heileTalelista = filhandtering.lesInnTaleliste();
+        this.lagreTaleliste = function (taleliste) {
+            writeFile(tekstfilNamn, JSON.stringify(taleliste));
+        };
 
-	var personar = filhandtering.lesInnPersonar();
-		
-	this.getTalelista = function () { return heileTalelista; }
-	this.getPersonlista = function () { return personar; }
-	this.getTimestamp = function () { return timestampCounter; }
-	
-	var nesteTalar = function (taltTid){
-		if (heileTalelista[timestampCounter-1] !== undefined) { heileTalelista[timestampCounter-1].talttid = taltTid; }
-		timestampCounter += 1;
-		filhandtering.lagreTimestamp(timestampCounter);
-		filhandtering.lagreTaleliste(heileTalelista);
-	}
-	var stryk = function (innleggId) {
-		if (innleggId <= timestampCounter) { return; } 
-		var skalFjernes = _.find(heileTalelista, function (element) { return element.id == innleggId; });
-		heileTalelista = _.without(heileTalelista, skalFjernes);
-		filhandtering.lagreTaleliste(heileTalelista);
-	}
+        this.lagreTimestamp = function (counter) {
+            writeFile(timestampFilnamn, counter);
+        };
 
-	var nyttInnlegg = function (innlegg) {
-		innlegg.id = nyInnleggsId();
-		heileTalelista.push(innlegg);
-		client.publish('/nyttInnleggId', {id: innlegg.id});
-		filhandtering.lagreTaleliste(heileTalelista);
-	}	
+        this.lagrePersonar = function (personar) {
+            writeFile(personFilnamn, JSON.stringify(personar));
+        };
 
-	var nyInnleggsId = function () {
-		var maksId = _.max(_.map(heileTalelista, function (element) { return element.id; }));
-		if (maksId < 0) { return 0 };
-		return maksId + 1;
-	}
+        this.lesTimestamp = function () {
+            if (fs.existsSync(timestampFilnamn)) {
+                return parseInt(fs.readFileSync(timestampFilnamn), 10);
+            }
+            fs.writeFile(timestampFilnamn, "");
+            return 0;
+        };
 
-	var nyReplikk = function (replikk) { if (heileTalelista[timestampCounter-1] !== undefined && heileTalelista[timestampCounter-1].type === "Svarreplikk") { return; }
-		var count = timestampCounter; 
-		var itemInList = heileTalelista[count]; while (itemInList != null && ( itemInList.type !== "Innlegg" && itemInList.type !== "Svarreplikk" ) ) {
-			count++;
-			itemInList = heileTalelista[count];
-		}
-	
-		//svarreplikk
-		if (!(_.find(heileTalelista, function (obj) { return obj.type === "Svarreplikk";}))) {
-			var originalInnlegget  = _.find(heileTalelista, function (element) { return element.type=='Innlegg';});
-			var svarreplikk = {type:'Svarreplikk', speaker: originalInnlegget.speaker, id: nyInnleggsId()};
-			heileTalelista.splice(count,0, svarreplikk);
-			client.publish('/nyttInnleggId', {id: svarreplikk.id});
-		}
+        function lesInnListe(filnamn) {
+            if (fs.existsSync(filnamn)) {
+                return JSON.parse(fs.readFileSync(filnamn));
+            }
+            fs.writeFile(filnamn, "[]");
+            return JSON.parse("[]");
+        }
 
-		// legg til innlegg i liste
-		replikk.id = nyInnleggsId();
-		heileTalelista.splice(count,0,replikk);
-		client.publish('/nyttInnleggId', {id: replikk.id});
-		filhandtering.lagreTaleliste(heileTalelista);
-	}
+        this.lesInnTaleliste = function () {
+            return lesInnListe(tekstfilNamn);
+        };
 
-	var flytt = function (innlegg, opp) {
-		common.flyttInnlegg(innlegg, opp, heileTalelista);
-		filhandtering.lagreTaleliste(heileTalelista);
-	}
+        this.lesInnPersonar = function () {
+            return lesInnListe(personFilnamn);
+        };
+    };
 
-	var tilDagsorden = function (innlegg) {
-		innlegg.id = heileTalelista.length;
-		if (_.first(heileTalelista).type !== "Til dagsorden") {
-			heileTalelista.unshift(innlegg);
-		}
-		else {
-			var indexToPutObject = _.find(heileTalelista, function (element) { return element.type !== "Til dagsorden"; });
-			heileTalelista.splice(_.indexOf(heileTalelista, indexToPutObject), 0, innlegg);
-		}
-		client.publish('/nyttInnleggId', {id: innlegg.id});
-		filhandtering.lagreTaleliste(heileTalelista);
-	}
+    namespace.Server = function () {
+        var filhandtering = new namespace.Filhandtering(),
+            client = bayeux.getClient(),
+            timestampCounter = filhandtering.lesTimestamp(),
+            heileTalelista = filhandtering.lesInnTaleliste(),
+            personar = filhandtering.lesInnPersonar();
 
-	var nyPerson = function (person) {
-		personar.push(person);
-		filhandtering.lagrePersonar(personar);
-	}
+        this.getTalelista = function () { return heileTalelista; };
+        this.getPersonlista = function () { return personar; };
+        this.getTimestamp = function () { return timestampCounter; };
 
-	bayeux.bind('publish', function(clientId, channel, data) {
-		switch (channel) {
-			case '/nesteTalar':
-				nesteTalar(data.taltTid);
-				break;
-			case '/stryk':
-				stryk(data.innlegg);
-				break;
-			case '/nyttInnlegg':
-				nyttInnlegg(data.innlegg);
-				break;
-			case '/nyReplikk':
-				nyReplikk(data.replikk);
-				break;
-			case '/flyttOpp':
-				flytt(data.innlegg, true);
-				break;
-			case '/flyttNed':
-				flytt(data.innlegg, false);
-				break;
-			case '/tilDagsorden':
-				tilDagsorden(data.innlegg);
-				break;
-			case '/nyPerson':
-				nyPerson(data.person);
-				break;
-		}
-	});
-};
+        function nesteTalar(taltTid) {
+            if (heileTalelista[timestampCounter - 1] !== undefined) { heileTalelista[timestampCounter - 1].talttid = taltTid; }
+            timestampCounter += 1;
+            filhandtering.lagreTimestamp(timestampCounter);
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function stryk(innleggId) {
+            if (innleggId <= timestampCounter) { return; }
+            var skalFjernes = _.find(heileTalelista, function (element) { return element.id === innleggId; });
+            heileTalelista = _.without(heileTalelista, skalFjernes);
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function nyInnleggsId() {
+            var maksId = _.max(_.map(heileTalelista, function (element) { return element.id; }));
+            if (maksId < 0) { return 0; }
+            return maksId + 1;
+        }
+
+        function nyttInnlegg(innlegg) {
+            innlegg.id = nyInnleggsId();
+            heileTalelista.push(innlegg);
+            client.publish('/nyttInnleggId', {id: innlegg.id});
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function nyReplikk(replikk) {
+            if (heileTalelista[timestampCounter - 1] !== undefined && heileTalelista[timestampCounter - 1].type === "Svarreplikk") { return; }
+            var count = timestampCounter,
+                itemInList = heileTalelista[count],
+                originalInnlegget = null,
+                svarreplikk = null;
+            while (itemInList !== null && (itemInList.type !== "Innlegg" && itemInList.type !== "Svarreplikk")) {
+                count += 1;
+                itemInList = heileTalelista[count];
+            }
+
+        //svarreplikk
+            if (!(_.find(heileTalelista, function (obj) { return obj.type === "Svarreplikk"; }))) {
+                originalInnlegget  = _.find(heileTalelista, function (element) { return element.type === 'Innlegg'; });
+                svarreplikk = {type: 'Svarreplikk', speaker: originalInnlegget.speaker, id: nyInnleggsId()};
+                heileTalelista.splice(count, 0, svarreplikk);
+                client.publish('/nyttInnleggId', {id: svarreplikk.id});
+            }
+
+        // legg til innlegg i liste
+            replikk.id = nyInnleggsId();
+            heileTalelista.splice(count, 0, replikk);
+            client.publish('/nyttInnleggId', {id: replikk.id});
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function flytt(innlegg, opp) {
+            common.flyttInnlegg(innlegg, opp, heileTalelista);
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function tilDagsorden(innlegg) {
+            innlegg.id = heileTalelista.length;
+            if (_.first(heileTalelista).type !== "Til dagsorden") {
+                heileTalelista.unshift(innlegg);
+            } else {
+                var indexToPutObject = _.find(heileTalelista, function (element) { return element.type !== "Til dagsorden"; });
+                heileTalelista.splice(_.indexOf(heileTalelista, indexToPutObject), 0, innlegg);
+            }
+            client.publish('/nyttInnleggId', {id: innlegg.id});
+            filhandtering.lagreTaleliste(heileTalelista);
+        }
+
+        function nyPerson(person) {
+            personar.push(person);
+            filhandtering.lagrePersonar(personar);
+        }
+
+        /*jslint unparam: true*/
+        bayeux.bind('publish', function (clientId, channel, data) {
+            switch (channel) {
+            case '/nesteTalar':
+                nesteTalar(data.taltTid);
+                break;
+            case '/stryk':
+                stryk(data.innlegg);
+                break;
+            case '/nyttInnlegg':
+                nyttInnlegg(data.innlegg);
+                break;
+            case '/nyReplikk':
+                nyReplikk(data.replikk);
+                break;
+            case '/flyttOpp':
+                flytt(data.innlegg, true);
+                break;
+            case '/flyttNed':
+                flytt(data.innlegg, false);
+                break;
+            case '/tilDagsorden':
+                tilDagsorden(data.innlegg);
+                break;
+            case '/nyPerson':
+                nyPerson(data.person);
+                break;
+            }
+        });
+    };
+    /*jslint unparam: false*/
+
+    model = new LM.Server();
+
+    /*jslint unparam: true*/
+    app.get('/lm/taleliste', function (request, response) {
+        response.jsonp({'response': model.getTalelista(), 'lastSpeaker': model.getTimestamp()});
+    });
+
+    app.get('/lm/personliste', function (request, response) {
+        response.jsonp({'response': model.getPersonlista()});
+    });
+
+    /*jslint unparam: false*/
+
+    bayeux.attach(app);
+    app.listen(128, 'localhost');
+    console.log("Express server listening in %s mode", app.settings.env);
 
 }(LM));
-
-var model = new LM.Server();
-
-app.get('/lm/taleliste', function (request, response) {
-	response.jsonp({'response': model.getTalelista(), 'lastSpeaker': model.getTimestamp()});
-});
-
-app.get('/lm/personliste', function (request, response) {
-	response.jsonp({'response': model.getPersonlista()});
-});
-
-bayeux.attach(app);
-app.listen(128, 'localhost');
-console.log("Express server listening in %s mode", app.settings.env);

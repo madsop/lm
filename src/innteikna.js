@@ -20,8 +20,8 @@ var LM = this.LM || {};
                 if (speakers === undefined) { return; }
                 return speakers.speaker.kjonn;
             });
-            temp.M = temp.M || 0;
-            temp.K = temp.K || 0;
+            temp.M = temp.Mann || 0;
+            temp.K = temp.Kvinne || 0;
 
             self.kjonnsprosent(((temp.K / (temp.M + temp.K)) * 100).toFixed(1) + "%");
         }
