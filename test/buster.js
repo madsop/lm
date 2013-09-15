@@ -11,5 +11,5 @@ config["Client tests"] = {
 config["Server tests"] = {
     rootPath: "../",
     environment: "node",
-    tests: ["test/shared/**/*-test.js"]
+    tests: ["test/shared/**/*-test.js", "test/server/**/*-test.js"]
 };

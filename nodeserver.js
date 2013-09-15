@@ -7,7 +7,7 @@ var LM = this.LM || {};
         faye = require('faye'),
         fs = require('fs'),
         _ = require('lodash'),
-        common = require('./src/common/common.js'),
+        common = require('./src/common.js'),
         bayeux = new faye.NodeAdapter({mount: '/faye*', timeout: 45}),
         app = express(),
         model = null;
@@ -231,4 +231,9 @@ var LM = this.LM || {};
     app.listen(128, 'localhost');
     console.log("Express server listening in %s mode", app.settings.env);
 
+console.log(namespace);
 }(LM));
+
+if (typeof require === "function" && module !== "undefined") {
+    module.exports.Filhandtering = LM.Filhandtering;
+}

@@ -9,12 +9,6 @@ var LM = this.LM || {};
             return namespace.Innlegg.create(receivedInnlegg);
         }
 
-        function fillSelect() {
-            var returnText = "";
-            _.each(self.allPersons, function (person) {returnText += "<option value='this.allPersons." + person.name + "'>" + person.name + "</option>"; });
-            document.getElementById('innleggsHaldar').innerHTML = returnText;
-        }
-
         function oppdaterKjonnsfordeling() {
             var temp = _.countBy(self.harSnakka(), function (speakers) {
                 if (speakers === undefined) { return; }
@@ -39,7 +33,7 @@ var LM = this.LM || {};
         function receiveInnleggListFromServer(receivedInnleggs, lastTimestamp) {
             var sortedList = _.sortBy(receivedInnleggs, function (person) { return person.timestamp; });
             _.each(sortedList, function (receivedInnlegg) {
-                if (self.allPersons[receivedInnlegg.speaker.name] !== undefined) {
+                if (receivedInnlegg.speaker !== undefined && self.allPersons[receivedInnlegg.speaker.name] !== undefined) {
                     var innlegg = lagInnleggsobjekt(receivedInnlegg);
                     if (innlegg.id < lastTimestamp) {
                         self.harSnakka.push(innlegg);
@@ -54,13 +48,20 @@ var LM = this.LM || {};
 
         function receivePersonListFromServer(receivedPersons) {
             var sortedList = _.sortBy(receivedPersons, function (person) { return person.name; });
-            _.each(sortedList, function (receivedPerson) { self.allPersons[receivedPerson.name] = namespace.Person.create(receivedPerson); });
-            fillSelect();
+            _.each(sortedList, function (receivedPerson) { 
+                self.allPersons[receivedPerson.name] = namespace.Person.create(receivedPerson); 
+                nyPerson(self.allPersons[receivedPerson.name]);
+            });
         }
 
-        function nyPerson(newPerson) {
-            self.allPersons[newPerson.person.name] = newPerson.person;
-            fillSelect();
+        function nyPerson(person) {
+            self.allPersons[person.name] = person;
+            if (document.getElementById('innleggsHaldar') !== null) {
+                var option = document.createElement('option');
+                option.value = self.allPersons[person.name];
+                option.text = person.name;
+                document.getElementById('innleggsHaldar').add(option, null);
+            }
         }
 
         function nyttInnlegg(innlegg) {
@@ -76,8 +77,7 @@ var LM = this.LM || {};
             }
         }
 
-        function flyttInnlegg(innlegg2, opp) {
-            var innlegg = innlegg2.innlegg;
+        function flyttInnlegg(innlegg, opp) {
             namespace.flyttInnlegg(innlegg, opp, self.allItems());
             self.allItems.valueHasMutated();
         }
@@ -191,12 +191,12 @@ var LM = this.LM || {};
         function subscribe() {
             hub.subscribe('/nesteTalar', function () { nesteTalar(); });
             hub.subscribe('/stryk', function (innlegg) { strykInnlegg(innlegg); });
-            hub.subscribe('/nyPerson', function (person) { nyPerson(person); });
+            hub.subscribe('/nyPerson', function (person) { nyPerson(person.person); });
             hub.subscribe('/nyttInnlegg', function (innlegg) { nyttInnlegg(innlegg); });
             hub.subscribe('/nyReplikk', function (innlegg) { nyReplikk(innlegg); });
             hub.subscribe('/tilDagsorden', function (innlegg) { tilDagsorden(innlegg); });
-            hub.subscribe('/flyttOpp', function (innlegg) { flyttInnlegg(innlegg, true); });
-            hub.subscribe('/flyttNed', function (innlegg) { flyttInnlegg(innlegg, false); });
+            hub.subscribe('/flyttOpp', function (innlegg) { flyttInnlegg(innlegg.innlegg, true); });
+            hub.subscribe('/flyttNed', function (innlegg) { flyttInnlegg(innlegg.innlegg, false); });
             hub.subscribe('/nyttInnleggId', function (innlegg) {
                 var innleggUtanId = _.find(self.allItems(), function (element) { return element.id === undefined; });
                 innleggUtanId.setId(innlegg.id);
@@ -223,7 +223,6 @@ var LM = this.LM || {};
             sisteInnlegg = self.activeSpeaker();
             hub = namespace.hub.create();
             hub.onRefresh(receiveInnleggListFromServer, receivePersonListFromServer);
-            fillSelect();
             subscribe();
         }());
     };
