@@ -46,14 +46,6 @@ var LM = this.LM || {};
             oppdaterSSTprosent();
         }
 
-        function receivePersonListFromServer(receivedPersons) {
-            var sortedList = _.sortBy(receivedPersons, function (person) { return person.name; });
-            _.each(sortedList, function (receivedPerson) { 
-                self.allPersons[receivedPerson.name] = namespace.Person.create(receivedPerson); 
-                nyPerson(self.allPersons[receivedPerson.name]);
-            });
-        }
-
         function nyPerson(person) {
             self.allPersons[person.name] = person;
             if (document.getElementById('innleggsHaldar') !== null) {
@@ -62,6 +54,14 @@ var LM = this.LM || {};
                 option.text = person.name;
                 document.getElementById('innleggsHaldar').add(option, null);
             }
+        }
+
+        function receivePersonListFromServer(receivedPersons) {
+            var sortedList = _.sortBy(receivedPersons, function (person) { return person.name; });
+            _.each(sortedList, function (receivedPerson) {
+                self.allPersons[receivedPerson.name] = namespace.Person.create(receivedPerson);
+                nyPerson(self.allPersons[receivedPerson.name]);
+            });
         }
 
         function nyttInnlegg(innlegg) {
