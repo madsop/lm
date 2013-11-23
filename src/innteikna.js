@@ -212,6 +212,19 @@ var LM = this.LM || {};
             });
         }
 
+        function startTime() {
+            var today = new Date();
+            self.klokka(today.getHours() + ":" +checkTime(today.getMinutes()) + ":" +checkTime(today.getSeconds()));
+            var t = setTimeout(function(){startTime()},500);
+        }
+
+        function checkTime(i) {
+            if (i<10) {
+                   i="0" + i;
+            }
+            return i;
+        }
+
         (function init() {
             self.allPersons = {};
             self.activeSpeaker = ko.observable();
@@ -220,6 +233,8 @@ var LM = this.LM || {};
             self.kjonnsprosent = ko.observable("-");
             self.sstprosent = ko.observable("-");
             self.allItems = ko.observableArray([]);
+            self.klokka = ko.observable("-");
+            startTime();
             sisteInnlegg = self.activeSpeaker();
             hub = namespace.hub.create();
             hub.onRefresh(receiveInnleggListFromServer, receivePersonListFromServer);
