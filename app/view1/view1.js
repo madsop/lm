@@ -114,13 +114,16 @@ var snakkaDa = "";
         setTimeout(Timer,100, snakkarNo);
 	};
 
-//	localStorage.taleliste = [];
-	try {
-		$scope.taleliste = JSON.parse(localStorage.taleliste);
-	}
-	catch(err) {
-		$scope.taleliste = [];
-	}
+	var resetTaleliste = function () {
+		//localStorage.taleliste = [];
+		try {
+			$scope.taleliste = JSON.parse(localStorage.taleliste);
+		}
+		catch(err) {
+			$scope.taleliste = [];
+		}
+	};
+	resetTaleliste();
 
 	var self = this;
 
@@ -132,13 +135,16 @@ var snakkaDa = "";
 
 	fillSelect();
 
-//	localStorage.harSnakka = [];
-	try {
-		$scope.harSnakka = JSON.parse(localStorage.harSnakka);
-	}
-	catch(err) {
-		$scope.harSnakka = [];
-	}
+	var resetHarSnakka = function () {
+		//	localStorage.harSnakka = [];
+		try {
+			$scope.harSnakka = JSON.parse(localStorage.harSnakka);
+		}
+		catch(err) {
+			$scope.harSnakka = [];
+		}
+	};
+	resetHarSnakka();
 
 	var sisteInnlegg = this.activeSpeaker;
 
@@ -227,7 +233,10 @@ var snakkaDa = "";
 			oppdaterKjonnsfordeling();
 		}
 		$scope.activeSpeaker = _.first($scope.taleliste);
+
+		if ($scope.taleliste != undefined && $scope.taleliste.length > 0) {
 		$scope.taleliste.splice(0,1);
+		}
 		if ($scope.activeSpeaker != undefined) {
 			reset($scope.activeSpeaker);
 			Timer($scope.activeSpeaker);
@@ -251,18 +260,46 @@ var snakkaDa = "";
 	}
 
 	$scope.feilfoert = function(speaker) {
-		if (confirm("Er du sikker på at dette " +speaker.type + "et frå " +speaker.speaker.name +" var feilført og skal fjernastcd?")) { 
+		if (confirm("Er du sikker på at dette " +speaker.type + "et frå " +speaker.speaker.name +" var feilført og skal fjernast?")) { 
 			$scope.harSnakka = _.without($scope.harSnakka, speaker);
 			localStorage.harSnakka = JSON.stringify($scope.harSnakka);
 		}
 	};
 
+	var downloadFile = function (data) {
+		data = _.map(data, function (element) {
+			return {"type": element.type, "name": element.speaker.name, "kjonn": element.speaker.kjonn};
+		});
+		data = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); 
+		window.open(data);
+	};
 
-	try {
-		$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
-	}
-	catch(err) {
+
+	var resetActiveSpeakerFromDisk = function () {
+		try {
+			$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
+		}
+		catch(err) {
+			$scope.activeSpeaker = {};
+		}
+	};
+	resetActiveSpeakerFromDisk();
+
+	$scope.nextDebate = function () {
+		if (!confirm("Er du sikker på at denne debatten er ferdig? Talelista vil bli sletta, og du kan ikkje angre dette")) {
+			return;
+		}
+		downloadFile($scope.harSnakka);
 		$scope.activeSpeaker = {};
+		$scope.taleliste = [];
+		$scope.harSnakka = [];
+		$scope.kjonnsprosent = '';
+		localStorage.kjonnsprosent = JSON.stringify($scope.kjonnsprosent);
+		localStorage.harSnakka = JSON.stringify($scope.harSnakka);
+		localStorage.taleliste = JSON.stringify($scope.taleliste);
+		localStorage.activeSpeaker = JSON.stringify($scope.activeSpeaker);
+		intercom.emit('taleliste', {});
+		intercom.emit('activeSpeaker', {});
 	}
 	sisteInnlegg = $scope.activeSpeaker;
 
