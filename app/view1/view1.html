@@ -1,0 +1,63 @@
+<div ng-controller="View1Ctrl">
+<h2>Taletid</h2>
+	<div id="addInnleggDiv">
+		Teikn person til innlegg
+		<form ng-submit="addInnlegg()">
+			<select id="typeInnlegg">
+				<option value="innlegg">Innlegg</option>
+				<option value="replikk">Replikk</option>
+				<option value="dagsorden">Til dagsorden</option>
+			</select>
+
+			<select id="innleggsHaldar"></select>
+			<button type="submit">Innteikn!</button>
+		</form>
+	</div>
+
+	<div id="addPersonDiv">	
+		Legg til person p&aring; m&oslash;tet
+		<form>
+		<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
+			<input type="text" ng-model="namn" placeholder="Namn" />
+			<select id="kjonnList">
+				<option value="K">Kvinne</option>
+				<option value="M">Mann</option>
+			</select>
+			<button type="submit" ng-click="addPerson(namn,kjonnList)">Legg til person</button>
+		</form>
+	</div>
+	  
+	<p id="snakkarNoAvsnitt">Snakkar no: 
+		<strong>
+			<span>{{activeSpeaker.speaker.name}}</span>
+			(<span>{{activeSpeaker.type}}</span>)
+		</strong>
+		(<span id="snakkande">{{activeSpeaker.taletid}}</span>)
+	</p>
+
+	<strong>Taleliste:</strong>
+	<table>
+		<tr ng-repeat="talar in taleliste track by talar.id">
+				<td>{{talar.speaker.name}}</td>
+				<td>({{talar.speaker.kjonn}})</td>
+				<td>({{talar.type}})</td>
+				<td><button ng-click="maybeRemoveSpeaker(talar)">Stryk</button></td>
+				<td><button ng-click="flyttOpp(talar)">Flytt opp</button></td>
+				<td><button ng-click="flyttNed(talar)">Flytt ned</button></td>
+			</tr>
+	</table>
+
+	Andel jenter: <span>{{kjonnsprosent}}</span>
+	<div id="nesteDiv">
+		<button ng-click="nextSpeaker()">Neste talar</button>
+	</div>
+
+	<em>Kven har snakka s&aring; langt?</em>
+	<table>
+		<tr ng-repeat="snakkada in harSnakka track by snakkada.id">
+			<td>{{snakkada.speaker.name}}</td> 
+			<td>({{snakkada.type}})</td>
+			<td><button ng-click="feilfoert(snakkada)">Feilf&oslash;rt?</button></td> 
+		</tr>
+	</table>
+</div>

@@ -1,0 +1,86 @@
+/* app css stylesheet */
+
+.menu {
+  list-style: none;
+  border-bottom: 0.1em solid black;
+  margin-bottom: 2em;
+  padding: 0 0 0.5em;
+}
+
+.menu:before {
+  content: "[";
+}
+
+.menu:after {
+  content: "]";
+}
+
+.menu > li {
+  display: inline;
+}
+
+.menu > li:before {
+  content: "|";
+  padding-right: 0.3em;
+}
+
+.menu > li:nth-child(1):before {
+  content: "";
+  padding: 0;
+}
+
+body { font-family: arial; font-size: 1em; }
+.liveExample b { font-weight: bold; }
+.liveExample p { margin-top: 0.9em; margin-bottom: 0.9em; }
+.liveExample select[multiple] { width: 100%; }
+
+table {
+  border: 0px solid red;
+  margin: auto;
+  padding: 0;
+}
+
+span, ul, li {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+ul {
+  list-style-type: none;
+}
+
+div {
+  margin-top: 1%;
+  margin-bottom: 1%;
+}
+
+div.liveExample {
+  width: 70%;
+  margin: auto;
+ border: 1px solid blue;
+  margin-top: 5%;
+}
+
+.liveExample {
+  margin: auto;
+  text-align: center;
+}
+
+p#snakkarNoAvsnitt {
+  margin-bottom: 4%;
+  font-size: 1.4em;
+}
+
+div#addPersonDiv, div#addInnleggDiv {
+# border: 1px solid black;
+}
+
+ul#talelisteBoks {
+# border: 2px solid blue;
+  width: 25%;
+  margin: 2% auto 5% auto;
+}
+
+div#nesteDiv {
+  margin-bottom: 3%;
+}
