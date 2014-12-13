@@ -10,6 +10,7 @@ angular.module('myApp.view1', ['ngRoute'])
 }])
 
 .controller('View1Ctrl', ['$scope', function ($scope) {
+var intercom = Intercom.getInstance();
 var minutes = 0, seconds = 0, milisec = 0;
 var snakkaDa = "";
 	var beregnTaletid = function (innlegg) {
@@ -72,12 +73,8 @@ var snakkaDa = "";
 	}
 	catch(err) {
 		$scope.allPersons = {};
-	} /* {
-		Mads: Person.create({name:"Mads",kjonn:"M"}),
-		Marie: Person.create({name:"Marie",kjonn:"K"}), 
-		Seher: Person.create({name:"Seher",kjonn:"K"}), 
-		Pål: Person.create({name:"Pål",kjonn:"M"})
-	};*/
+	}
+
 	var reset = function (innlegg) {
 		var taletid = Innlegg.taletid(innlegg);
 		var s = parseInt(taletid);
@@ -124,11 +121,6 @@ var snakkaDa = "";
 	catch(err) {
 		$scope.taleliste = [];
 	}
-	/*[
-		Innlegg.create({speaker:$scope.allPersons.Seher, type:"Innlegg"}),
-		Innlegg.create({speaker:$scope.allPersons.Mads, type:"Innlegg"}),
-		Innlegg.create({speaker:$scope.allPersons.Marie, type:"Innlegg"})
-	]; // Initial items*/
 
 	var self = this;
 
@@ -147,10 +139,7 @@ var snakkaDa = "";
 	catch(err) {
 		$scope.harSnakka = [];
 	}
-//	this.harSnakka = ko.observableArray([]);
-	
-//	this.activeSpeaker = ko.observable(Innlegg.create({type:"Innlegg", speaker:this.allPersons.Marie}));								
-	//reset(this.activeSpeaker(), this.harSnakka());
+
 	var sisteInnlegg = this.activeSpeaker;
 
 	$scope.addPerson = function (name, kjonn) {
@@ -176,16 +165,17 @@ var snakkaDa = "";
 			type:type,
 			id:speaker.name + type + Math.random()
 		});
-		if (newInnlegg.getType() === "Til dagsorden") {
+		if (newInnlegg.type === "Til dagsorden") {
 			$scope.taleliste.splice(0,0,newInnlegg);
 		}
-		else if (newInnlegg.getType() === "Replikk") {
+		else if (newInnlegg.type === "Replikk") {
 			nyReplikk(newInnlegg);
 		}
 		else {
 			$scope.taleliste.push(newInnlegg);
 		}
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
+		intercom.emit('taleliste', {});
 	};
 	
 	$scope.flyttOpp = function (innlegg) {
@@ -194,6 +184,7 @@ var snakkaDa = "";
 		$scope.taleliste[index] = $scope.taleliste[index-1];
 		$scope.taleliste[index-1] = innlegg;
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
+		intercom.emit('taleliste', {});
 	};
 
 	$scope.flyttNed = function (innlegg) {
@@ -202,25 +193,27 @@ var snakkaDa = "";
 		$scope.taleliste[index] = $scope.taleliste[index+1];
 		$scope.taleliste[index+1] = innlegg;
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
+		intercom.emit('taleliste', {});
 	}
 
 	var nyReplikk = function (newPerson) {
 		var count = 0;
 		var itemInList = $scope.taleliste[count];
-		while (itemInList != null && ( itemInList.getType() !== "Innlegg" && itemInList.getType() !== "Svarreplikk" ) ) {
+		while (itemInList != null && itemInList != undefined && (itemInList.type !== "Innlegg" && itemInList.type !== "Svarreplikk" ) ) {
 			count++;
 			itemInList = $scope.taleliste[count];
 		}
-		if (!(_.find($scope.taleliste, function (obj) { return obj.getType() === "Svarreplikk";}))) {
+		if (!(_.find($scope.taleliste, function (obj) { return obj.type === "Svarreplikk";}))) {
 			$scope.taleliste.splice(count,0, Innlegg.create({speaker:sisteInnlegg.speaker, type: "Svarreplikk"}));
 		}
 		$scope.taleliste.splice(count,0,newPerson);
 	};
 
 	$scope.maybeRemoveSpeaker = function (speaker) {
-		if (confirm("Er du sikker på at du vil stryke " +speaker.speaker.name +"?")) { 
+		if (confirm("Er du sikker på at du vil stryke " +speaker.type + " frå " +speaker.speaker.name +"?")) { 
 			$scope.taleliste = _.without($scope.taleliste, speaker);
 			localStorage.taleliste = JSON.stringify($scope.taleliste);
+			intercom.emit('taleliste', {});
 		}
 	};
 
@@ -243,6 +236,8 @@ var snakkaDa = "";
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
 		localStorage.harSnakka = JSON.stringify($scope.harSnakka);
 		localStorage.activeSpeaker = JSON.stringify($scope.activeSpeaker);
+		intercom.emit('taleliste', {});
+		intercom.emit('activeSpeaker', {});
 	};
 
 	var oppdaterKjonnsfordeling = function () {
@@ -269,6 +264,7 @@ var snakkaDa = "";
 	catch(err) {
 		$scope.activeSpeaker = {};
 	}
+	sisteInnlegg = $scope.activeSpeaker;
 
 	Timer(this.activeSpeaker);
 	oppdaterKjonnsfordeling();

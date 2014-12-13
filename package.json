@@ -14,7 +14,8 @@
     "karma-junit-reporter": "^0.2.2",
     "knockout": "*",
     "lodash": "*",
-    "flatfile": "*"
+    "flatfile": "*",
+    "intercom": "*"
   },
   "scripts": {
     "postinstall": "bower install",

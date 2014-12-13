@@ -56,7 +56,8 @@
 	<table>
 		<tr ng-repeat="snakkada in harSnakka track by snakkada.id">
 			<td>{{snakkada.speaker.name}}</td> 
-			<td>({{snakkada.type}})</td>
+			<td>({{snakkada.speaker.kjonn}},</td>
+			<td>{{snakkada.type}})</td>
 			<td><button ng-click="feilfoert(snakkada)">Feilf&oslash;rt?</button></td> 
 		</tr>
 	</table>

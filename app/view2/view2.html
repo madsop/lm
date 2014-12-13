@@ -1,5 +1,18 @@
-<p>This is the partial for view 2.</p>
-<p>
-  Showing of 'interpolate' filter:
-  {{ 'Current version is v%VERSION%.' | interpolate }}
-</p>
+<div ng-controller="View2Ctrl" id="view2div">
+	<p id="snakkarNoAvsnitt">Snakkar no:<br/>
+		<h3>
+			<span>{{activeSpeaker.speaker.name}}</span>
+			(<span>{{activeSpeaker.type}}</span>)
+		</h3>
+	</p>
+
+	<strong id="talelistestrong">Taleliste:</strong>
+
+	<table>
+		<tr ng-repeat="talar in taleliste track by talar.id">
+				<td>{{talar.speaker.name}}</td>
+				<td>({{talar.speaker.kjonn}})</td>
+				<td>({{talar.type}})</td>
+		</tr>
+	</table>
+</div>

@@ -57,7 +57,7 @@ div {
 div.liveExample {
   width: 70%;
   margin: auto;
- border: 1px solid blue;
+  border: 0px solid blue;
   margin-top: 5%;
 }
 
@@ -83,4 +83,24 @@ ul#talelisteBoks {
 
 div#nesteDiv {
   margin-bottom: 3%;
+}
+
+#view2div p{
+  padding: 0;
+  margin: 0;
+}
+
+#view2div h3 {
+  font-size: 2.8em;
+  padding-bottom: 1em;
+  margin: 0;
+}
+
+#view2div {
+  font-size: 1.4em;
+}
+
+#talelistestrong {
+  margin-bottom: 4em;
+  padding-bottom: 3em;
 }
