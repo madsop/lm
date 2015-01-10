@@ -23,7 +23,7 @@
 				<option value="K">Kvinne</option>
 				<option value="M">Mann</option>
 			</select>
-			<button type="submit" ng-click="addPerson(namn,kjonnList)">Legg til person</button>
+			<button type="submit" ng-click="addPersonFromView(namn,kjonnList)">Legg til person</button>
 		</form>
 	</div>
 	  
@@ -53,6 +53,23 @@
 	</div>
 
 	<button ng-click="nextDebate()">Neste debatt</button><br />
+	Last inn deltakarliste: <input type="file" id="files" name="files[]" onchange="angular.element(this).scope().uploadFile(this)">
+	<br />
+
+	<table>
+		<tr>
+			<td>Taletid innlegg:</td>
+			<td> <input class="taletid" type="number" name="input" ng-model="taletidMinuttInnlegg" min="0" max="10" required></td>
+			<td>Taletid 2g-innlegg:</td>
+			<td><input class="taletid"  type="number" name="input" ng-model="taletidMinuttAndregangsInnlegg" min="0" max="10" required></td>
+		</tr>
+		<tr>
+            <td>Taletid replikk:</td>
+            <td><input class="taletid"  type="number" name="input" ng-model="taletidMinuttReplikk" min="0" max="10" required></td>
+			<td>Taletid dagsorden:</td>
+			<td><input class="taletid" type="number" name="input" ng-model="taletidMinuttDagsorden"  min="0" max="10" required></td>
+		</tr>
+	</table>
 
 	<em>Kven har snakka s&aring; langt?</em>
 	<table>

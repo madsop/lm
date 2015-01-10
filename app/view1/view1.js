@@ -11,6 +11,10 @@ angular.module('myApp.view1', ['ngRoute'])
 
 .controller('View1Ctrl', ['$scope', function ($scope) {
 var intercom = Intercom.getInstance();
+$scope.taletidMinuttInnlegg = 3;
+$scope.taletidMinuttAndregangsInnlegg = 2;
+$scope.taletidMinuttReplikk = 1;
+$scope.taletidMinuttDagsorden = 1.5;
 var minutes = 0, seconds = 0, milisec = 0;
 var snakkaDa = "";
 	var beregnTaletid = function (innlegg) {
@@ -19,17 +23,17 @@ var snakkaDa = "";
 				speakers = _.pluck($scope.harSnakka, 'speaker');
 				speakers = _.pluck(speakers, 'name');
 				if (_.contains(speakers, innlegg.speaker.name)) {
-					return 120;
+					return $scope.taletidMinuttAndregangsInnlegg * 60;
 				}
 				else {
-					return 180;
+					return $scope.taletidMinuttInnlegg * 60;
 				}
 			}
 			else if (innlegg.type === "Replikk" || innlegg.type === "Svarreplikk") {
-				return 60;
+				return $scope.taletidMinuttReplikk * 60;
 			}
 			else {
-				return 120;
+				return $scope.taletidMinuttDagsorden * 60;
 			}
 	};
 	var Innlegg = {
@@ -148,17 +152,23 @@ var snakkaDa = "";
 
 	var sisteInnlegg = this.activeSpeaker;
 
+
+	$scope.addPersonFromView = function(name, kjonn) {
+		$scope.addPerson(name, kjonnList.options[kjonnList.selectedIndex].text);
+	}
+
 	$scope.addPerson = function (name, kjonn) {
 		if (name !== "" && name != undefined) { // Prevent blanks
 				var newPerson = Person.create({
 					name:name,
-					kjonn:kjonnList.options[kjonnList.selectedIndex].text
+					kjonn:kjonn
 			});
 			$scope.allPersons[newPerson.name] = newPerson;
 			fillSelect();
 			localStorage.allPersons = JSON.stringify($scope.allPersons);
 		} 
 	}
+	localStorage.allPersons = [];
 
 	$scope.addInnlegg = function () {
 		var selectList = document.getElementById("typeInnlegg");
@@ -263,6 +273,7 @@ var snakkaDa = "";
 		if (confirm("Er du sikker på at dette " +speaker.type + "et frå " +speaker.speaker.name +" var feilført og skal fjernast?")) { 
 			$scope.harSnakka = _.without($scope.harSnakka, speaker);
 			localStorage.harSnakka = JSON.stringify($scope.harSnakka);
+			oppdaterKjonnsfordeling();
 		}
 	};
 
@@ -305,5 +316,40 @@ var snakkaDa = "";
 
 	Timer(this.activeSpeaker);
 	oppdaterKjonnsfordeling();
+	var numberOfInterestingFieldsPerDelegate = 3;
+
+	$scope.uploadFile = function (files) {
+		var results = Papa.parse(files.files[0], {
+			complete: function(results) {
+				var i;
+				for (i = 0; i < results.data.length; i++) {
+					var row = results.data[i];
+					if (row.length === numberOfInterestingFieldsPerDelegate) {
+						console.log(results.data[i]);
+						var nrAndName = row[0] + ":" + row[1];
+						$scope.addPerson(nrAndName, row[2]);
+					}
+				}
+			}
+		});
+
+/*		var filez = files.files;
+		var file = filez[0];
+		var reader = new FileReader();
+	    reader.readAsText(file);
+	    reader.onload = function(event){
+		     var csv = event.target.result;
+		     var data = $.csv.toArrays(csv);
+		     var html = '';
+		     for(var row in data) {
+		        html += '<tr>\r\n';
+		        for(var item in data[row]) {
+		          html += '<td>' + data[row][item] + '</td>\r\n';
+		        }
+		     	html += '</tr>\r\n';
+		     }
+		     $('#contents').html(html);
+    	}; */
+	};
 
 }]);
