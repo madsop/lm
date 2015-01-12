@@ -1,5 +1,13 @@
 /* app css stylesheet */
 
+html,body {
+    height:100%;
+}
+
+h2 {
+  font-size: 2em;
+}
+
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
@@ -56,12 +64,36 @@ ul {
 }
 
 div {
+  border: 0px solid black;
   margin-top: 1%;
   margin-bottom: 1%;
+  margin: auto;
+}
+
+div#leftdiv {
+  width: 65%;
+  float: left;
+  border: 1px solid black;
+}
+
+div#rightdiv {
+  margin-left: 2em;
+  width: 30%;
+  float: left;
+  border: 1px solid black;
+}
+
+div.clear {
+  clear: both;
+}
+
+button#nextDebate {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 div.liveExample {
-  width: 70%;
+  width: 95%;
   margin: auto;
   border: 0px solid blue;
   margin-top: 5%;
@@ -87,8 +119,21 @@ ul#talelisteBoks {
   margin: 2% auto 5% auto;
 }
 
+button {
+  margin-top: 0.5em;
+}
+
 div#nesteDiv {
   margin-bottom: 3%;
+}
+
+div#lastinn, div#addPersonDiv {
+  margin-top: 1em;
+  margin-bottom: 2em;
+}
+
+#view1div h3 {
+  font-size: 1.1em;
 }
 
 #view2div p{
