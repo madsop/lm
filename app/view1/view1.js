@@ -168,7 +168,7 @@ var snakkaDa = "";
 			localStorage.allPersons = JSON.stringify($scope.allPersons);
 		} 
 	}
-	localStorage.allPersons = [];
+	//localStorage.allPersons = [];
 
 	$scope.addInnlegg = function () {
 		var selectList = document.getElementById("typeInnlegg");

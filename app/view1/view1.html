@@ -11,7 +11,7 @@
 				</select>
 
 				<select id="innleggsHaldar"></select>
-				<button type="submit">Innteikn!</button>
+				<button type="submit"><img src="view1/accept.png" alt="Innteikn!" class="arrow" /></button>
 			</form>
 		</div>
 		  
@@ -29,15 +29,15 @@
 					<td>{{talar.speaker.name}}</td>
 					<td>({{talar.speaker.kjonn}})</td>
 					<td>({{talar.type}})</td>
-					<td><button ng-click="maybeRemoveSpeaker(talar)">Stryk</button></td>
-					<td><button ng-click="flyttOpp(talar)">Flytt opp</button></td>
-					<td><button ng-click="flyttNed(talar)">Flytt ned</button></td>
+					<td><button ng-click="maybeRemoveSpeaker(talar)"><img src="view1/stryk.png" alt="Stryk" class="arrow"/></button></td>
+					<td><button ng-click="flyttOpp(talar)"><img src="view1/up.png" alt="Flytt opp" class="arrow"/></button></td>
+					<td><button ng-click="flyttNed(talar)"><img src="view1/down.png" alt="Flytt ned" class="arrow" /></button></td>
 				</tr>
 		</table>
 
 		Andel jenter: <span>{{kjonnsprosent}}</span>
 		<div id="nesteDiv">
-			<button ng-click="nextSpeaker()">Neste talar</button>
+			<button ng-click="nextSpeaker()"><img src="view1/next.png" alt="Neste talar" id="nextSpeaker" /></button>
 		</div>
 
 
@@ -47,7 +47,7 @@
 				<td>{{snakkada.speaker.name}}</td> 
 				<td>({{snakkada.speaker.kjonn}},</td>
 				<td>{{snakkada.type}})</td>
-				<td><button ng-click="feilfoert(snakkada)">Feilf&oslash;rt?</button></td> 
+				<td><button ng-click="feilfoert(snakkada)"><img src="view1/stryk.png" alt="Feilf&oslash;rt?" class="arrow"/></button></td> 
 			</tr>
 		</table>
 	</div>
@@ -57,6 +57,8 @@
 		<div id="lastinn">
 		Last inn deltakarliste: <input type="file" id="files" name="files[]" value = "Last inn deltakarliste" onchange="angular.element(this).scope().uploadFile(this)">
 		</div>
+
+		<hr />
 
 		<div id="addPersonDiv">	
 			Legg til person p&aring; m&oslash;tet
@@ -72,6 +74,8 @@
 			</form>
 		</div>
 
+		<hr />
+
 		<table>
 			<tr>
 				<td>Taletid innlegg:</td>
@@ -86,6 +90,8 @@
 				<td><input class="taletid" type="number" name="input" ng-model="taletidMinuttDagsorden"  min="0" max="10" required></td>
 			</tr>
 		</table>
+
+		<hr />
 
 		<button id="nextDebate" ng-click="nextDebate()">Neste debatt</button><br />
 

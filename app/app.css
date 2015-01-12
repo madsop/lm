@@ -1,9 +1,5 @@
 /* app css stylesheet */
 
-html,body {
-    height:100%;
-}
-
 h2 {
   font-size: 2em;
 }
@@ -88,8 +84,12 @@ div.clear {
 }
 
 button#nextDebate {
-  margin-top: 1em;
+  margin-top: 3em;
   margin-bottom: 1em;
+}
+img#nextSpeaker {
+  width: 2em;
+  height: 1em;
 }
 
 div.liveExample {
@@ -119,8 +119,14 @@ ul#talelisteBoks {
   margin: 2% auto 5% auto;
 }
 
+img.arrow {
+  width: 1em;
+  height: 1em;
+}
+
 button {
-  margin-top: 0.5em;
+  margin-top: 0.4em;
+  margin-bottom: 0.2em;
 }
 
 div#nesteDiv {
