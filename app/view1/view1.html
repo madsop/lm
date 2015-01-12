@@ -63,14 +63,14 @@
 		<div id="addPersonDiv">	
 			Legg til person p&aring; m&oslash;tet
 			<form>
-			<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
+			<input type="text" ng-model="delegatnummerText" placeholder="Nr" id="delegatnrText" />
 				<input type="text" ng-model="namn" placeholder="Namn" />
 				<select id="kjonnList">
 					<option value="K">Kvinne</option>
 					<option value="M">Mann</option>
 				</select>
 				<br />
-				<button type="submit" ng-click="addPersonFromView(namn,kjonnList)">Legg til person</button>
+				<button type="submit" ng-click="addPersonFromView(delegatnummerText, namn,kjonnList)">Legg til person</button>
 			</form>
 		</div>
 

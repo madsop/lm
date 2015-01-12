@@ -153,8 +153,8 @@ var snakkaDa = "";
 	var sisteInnlegg = this.activeSpeaker;
 
 
-	$scope.addPersonFromView = function(name, kjonn) {
-		$scope.addPerson(name, kjonnList.options[kjonnList.selectedIndex].text);
+	$scope.addPersonFromView = function(delegatnummerText, name, kjonn) {
+		$scope.addPerson(delegatnummerText +": " + name, kjonnList.options[kjonnList.selectedIndex].text);
 	}
 
 	$scope.addPerson = function (name, kjonn) {
@@ -326,30 +326,12 @@ var snakkaDa = "";
 					var row = results.data[i];
 					if (row.length === numberOfInterestingFieldsPerDelegate) {
 						console.log(results.data[i]);
-						var nrAndName = row[0] + ":" + row[1];
+						var nrAndName = row[0] + ": " + row[1];
 						$scope.addPerson(nrAndName, row[2]);
 					}
 				}
 			}
 		});
-
-/*		var filez = files.files;
-		var file = filez[0];
-		var reader = new FileReader();
-	    reader.readAsText(file);
-	    reader.onload = function(event){
-		     var csv = event.target.result;
-		     var data = $.csv.toArrays(csv);
-		     var html = '';
-		     for(var row in data) {
-		        html += '<tr>\r\n';
-		        for(var item in data[row]) {
-		          html += '<td>' + data[row][item] + '</td>\r\n';
-		        }
-		     	html += '</tr>\r\n';
-		     }
-		     $('#contents').html(html);
-    	}; */
 	};
 
 }]);

@@ -119,6 +119,10 @@ ul#talelisteBoks {
   margin: 2% auto 5% auto;
 }
 
+input#delegatnrText {
+  width: 2em;
+}
+
 img.arrow {
   width: 1em;
   height: 1em;
