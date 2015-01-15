@@ -1,6 +1,9 @@
 <div ng-controller="View1Ctrl">
 	<div id="leftdiv">
-		<h2>Taletid</h2>
+		<div id="header">
+			<h2>Landsmøte 2015</h2>
+		</div>
+		<div class="clear"></div>
 		<div id="addInnleggDiv">
 			Teikn person til innlegg
 			<form ng-submit="addInnlegg()">
@@ -35,11 +38,14 @@
 				</tr>
 		</table>
 
-		Andel jenter: <span>{{kjonnsprosent}}</span>
+		<span id="talelistaErTom">{{talelistaErTom}}</span><br />
 		<div id="nesteDiv">
 			<button ng-click="nextSpeaker()"><img src="view1/next.png" alt="Neste talar" id="nextSpeaker" /></button>
 		</div>
 
+
+
+		Andel jenter: <span>{{kjonnsprosent}}</span><br />
 
 		<em>Kven har snakka s&aring; langt?</em>
 		<table>

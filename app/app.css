@@ -11,6 +11,21 @@ h2 {
   padding: 0 0 0.5em;
 }
 
+img.logo {
+  width: 6em;
+  height: 6em;
+}
+div.header {
+  text-align: center;
+}
+
+.header img {
+  float: right;
+}
+div#headertext {
+  margin: auto;
+}
+
 .menu:before {
   content: "[";
 }
@@ -39,7 +54,6 @@ body { font-family: arial; font-size: 1em; }
 .liveExample select[multiple] { width: 100%; }
 
 table {
-  border: 0px solid red;
   margin: auto;
   padding: 0;
   margin-top: 0.5em;
@@ -60,7 +74,6 @@ ul {
 }
 
 div {
-  border: 0px solid black;
   margin-top: 1%;
   margin-bottom: 1%;
   margin: auto;
@@ -95,7 +108,6 @@ img#nextSpeaker {
 div.liveExample {
   width: 95%;
   margin: auto;
-  border: 0px solid blue;
   margin-top: 5%;
 }
 
@@ -109,12 +121,7 @@ p#snakkarNoAvsnitt {
   font-size: 1.4em;
 }
 
-div#addPersonDiv, div#addInnleggDiv {
-# border: 1px solid black;
-}
-
 ul#talelisteBoks {
-# border: 2px solid blue;
   width: 25%;
   margin: 2% auto 5% auto;
 }
@@ -139,6 +146,11 @@ div#nesteDiv {
 
 div#lastinn, div#addPersonDiv {
   margin-top: 1em;
+  margin-bottom: 2em;
+}
+
+span#talelistaErTom {
+  font-size: 1.5em;
   margin-bottom: 2em;
 }
 

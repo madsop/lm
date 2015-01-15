@@ -15,6 +15,8 @@ $scope.taletidMinuttInnlegg = 3;
 $scope.taletidMinuttAndregangsInnlegg = 2;
 $scope.taletidMinuttReplikk = 1;
 $scope.taletidMinuttDagsorden = 1.5;
+$scope.talelistaErTom = "";
+
 var minutes = 0, seconds = 0, milisec = 0;
 var snakkaDa = "";
 	var beregnTaletid = function (innlegg) {
@@ -171,6 +173,10 @@ var snakkaDa = "";
 	//localStorage.allPersons = [];
 
 	$scope.addInnlegg = function () {
+		if ($scope.taleliste.length === 0) {
+			$scope.talelistaErTom = "";
+		}
+
 		var selectList = document.getElementById("typeInnlegg");
 		var personList = document.getElementById("innleggsHaldar");
 
@@ -257,6 +263,10 @@ var snakkaDa = "";
 		localStorage.activeSpeaker = JSON.stringify($scope.activeSpeaker);
 		intercom.emit('taleliste', {});
 		intercom.emit('activeSpeaker', {});
+
+		if ($scope.taleliste.length === 0) {
+			$scope.talelistaErTom = "Talelista er tom";
+		}
 	};
 
 	var oppdaterKjonnsfordeling = function () {
