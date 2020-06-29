@@ -1,0 +1,17 @@
+spec møteverktyg
+
+- synleggjera tydeleg gjenverande tid
+- gjerne kven som snakkar (ikkje så viktig på første møte)
+- taleliste
+-- kan her godt ha fritekst iallfall i første runde
+- kjønnsstatistikk om mogleg
+- kan rekne ut antal innlegg osv basert på namn
+- moglegheit til å spesifisere innlegg/replikk
+
+- automatisk persistering ved endringar - både i minnet og til disk
+- oppdatering on-the-fly
+
+- tretti sekund igjen-åtvaring
+- ideelt: simpel tidsvising til den som snakkar
+- ideelt: innstillingar-panel med taletid osv
+- interessant å dele talelista per debatt?
