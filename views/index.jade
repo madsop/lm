@@ -1,0 +1,113 @@
+doctype html
+html(lang="no")
+head
+#<script src="lib/knockout-2.1.0.js"> </script>
+#	<script src="lib/underscore-min.js"></script>
+#	<script src="lib/jquery-2.0.3.min.js"></script>
+#	<script src="lib/faye-browser-min.js"></script>
+#	<script src="lib/jquery.countdown.min.js"></script>
+#	<script src="/src/common.js"></script>
+#	<script src="/src/kommunikasjon.js"></script>
+#	<script src="/src/person.js"></script>
+#	<script src="/src/innlegg.js"></script>
+#	<script src="/src/innteikna.js"></script>
+#	<link rel="stylesheet" type="text/css" href="stylesheet.css">
+
+link(rel='stylesheet', href='stylesheet.css')
+
+body
+
+
+div.liveExample
+	h2 Taletid
+		Klokka er <span id="klokka" data-bind="text: klokka() ">
+	div#addInnleggDiv
+		Teikn person til innlegg
+		form(data-bind="submit:addInnlegg")	
+			select(id="typeInnlegg)
+				option(value="innlegg")Innlegg
+				option(value="replikk")Replikk
+				option(value="Dagsorden")Til dagsorden
+		
+
+#			<select id="typeInnlegg">
+#				<option value="innlegg">Innlegg</option>
+#				<option value="replikk">Replikk</option>
+#				<option value="dagsorden">Til dagsorden</option>
+			</select>
+
+			<select id="innleggsHaldar"></select>
+			<button type="submit">Innteikn!</button>
+		</form>
+	</div>
+
+	<div id="addPersonDiv">	
+		Legg til person p&aring; m&oslash;tet
+		<form data-bind="submit:addPerson">
+		<!--	<input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />-->
+			<input type="text" data-bind='value:newPersonName, valueUpdate: "afterkeydown"' placeholder="Namn" />
+			<select id="kjonnList">
+				<option value="K">Kvinne</option>
+				<option value="M">Mann</option>
+			</select>
+			<select id="vervList">
+				<option value="-">-</option>
+				<option value="SST">SST</option>
+				<option value="LS">LS</option>
+			</select>
+			<button type="submit" data-bind="enable: newPersonName().length > 0">Legg til person</button>
+		</form>
+	</div>
+	  
+	<p id="snakkarNoAvsnitt">Snakkar no: 
+		<strong>
+			<span data-bind="text: activeSpeaker() ? activeSpeaker().speaker.name : ''"></span>
+			(<span data-bind="text: activeSpeaker() ? activeSpeaker().type : ''"></span>)
+		</strong>
+		<span id='snakkande'></span>
+		<span id="countdown"></span>
+		<button type="button" id="pauseButton">Pause</button>
+	</p>
+
+	<strong>Taleliste:</strong>
+	 <ul data-bind="foreach: allItems" id="talelisteBoks">
+		<li>
+			<table>
+				<tr>
+					<td><span data-bind="text: speaker.name"></span></td>
+					<td>(<span data-bind="text: getType()"></span>)</td>
+					<td>
+						<a href="#" data-bind="click: $parent.maybeRemoveSpeaker">Stryk</a>
+						<a href="#" data-bind="click: $parent.flyttOppTrykka">Flytt opp</a>
+						<a href="#" data-bind="click: $parent.flyttNedTrykka">Flytt ned</a>
+					</td>
+				</tr>
+			</table>
+		</li>
+	 </ul>
+
+	Andel jenter: <span data-bind='text: kjonnsprosent'></span><br />
+	Andel SST: <span data-bind="text: sstprosent"></span>
+	<div id="nesteDiv">
+		<button data-bind="click: nextSpeaker, enable: allItems().length > 0">Neste talar</button>
+	</div>
+
+	<em>Kven har snakka s&aring; langt?</em>
+	<ul data-bind="foreach: harSnakka">
+		<li>
+			<span data-bind="text: speaker.name"></span>
+			(<span data-bind="text: getType()"></span>)
+			(<span data-bind="text: speaker.verv"></span>)
+		</li>
+	</ul>
+
+</div>
+
+<script type='text/javascript'>
+	var model = new LM.BetterListModel();
+	console.log(model);
+	ko.applyBindings(model);
+</script>
+
+</body>
+
