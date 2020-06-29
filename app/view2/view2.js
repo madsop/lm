@@ -1,7 +1,5 @@
 'use strict';
 
-var intercom = Intercom.getInstance();
-
 angular.module('myApp.view2', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
@@ -11,37 +9,6 @@ angular.module('myApp.view2', ['ngRoute'])
   });
 }])
 
-.controller('View2Ctrl', ['$scope', function ($scope) {
-	try {
-		$scope.taleliste = JSON.parse(localStorage.taleliste);
-	}
-	catch(err) {
-		$scope.taleliste = [];
-	}
+.controller('View2Ctrl', [function() {
 
-	try {
-		$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
-	}
-	catch(err) {
-		$scope.activeSpeaker = {};
-	}
-intercom.on('taleliste', function(data) {
-	$scope.taleliste = JSON.parse(localStorage.taleliste);
-	$scope.$apply();
-});
-intercom.on('activeSpeaker', function(data) {
-	$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
-	$scope.$apply();
-});
 }]);
-
-
-
-/*angular.element($window).on('storage', function(event) {
-	if (event.key == 'taleliste') {
-		$scope.taleliste = localStorage.taleliste;
-	}
-	if (event.key == 'activeSpeaker') {
-		$scope.activeSpeaker = localStorage.activeSpeaker;
-	}
-});*/

@@ -1,29 +1,10 @@
 /* app css stylesheet */
 
-h2 {
-  font-size: 2em;
-}
-
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
   margin-bottom: 2em;
   padding: 0 0 0.5em;
-}
-
-img.logo {
-  width: 6em;
-  height: 6em;
-}
-div.header {
-  text-align: center;
-}
-
-.header img {
-  float: right;
-}
-div#headertext {
-  margin: auto;
 }
 
 .menu:before {
@@ -54,14 +35,9 @@ body { font-family: arial; font-size: 1em; }
 .liveExample select[multiple] { width: 100%; }
 
 table {
+  border: 0px solid red;
   margin: auto;
   padding: 0;
-  margin-top: 0.5em;
-}
-
-td {
-  padding: 0.2em 0.5em 0.2em 0.5em;
-
 }
 
 span, ul, li {
@@ -76,38 +52,12 @@ ul {
 div {
   margin-top: 1%;
   margin-bottom: 1%;
-  margin: auto;
-}
-
-div#leftdiv {
-  width: 65%;
-  float: left;
-  border: 1px solid black;
-}
-
-div#rightdiv {
-  margin-left: 2em;
-  width: 30%;
-  float: left;
-  border: 1px solid black;
-}
-
-div.clear {
-  clear: both;
-}
-
-button#nextDebate {
-  margin-top: 3em;
-  margin-bottom: 1em;
-}
-img#nextSpeaker {
-  width: 2em;
-  height: 1em;
 }
 
 div.liveExample {
-  width: 95%;
+  width: 70%;
   margin: auto;
+ border: 1px solid blue;
   margin-top: 5%;
 }
 
@@ -121,63 +71,16 @@ p#snakkarNoAvsnitt {
   font-size: 1.4em;
 }
 
+div#addPersonDiv, div#addInnleggDiv {
+# border: 1px solid black;
+}
+
 ul#talelisteBoks {
+# border: 2px solid blue;
   width: 25%;
   margin: 2% auto 5% auto;
 }
 
-input#delegatnrText {
-  width: 2em;
-}
-
-img.arrow {
-  width: 1em;
-  height: 1em;
-}
-
-button {
-  margin-top: 0.4em;
-  margin-bottom: 0.2em;
-}
-
 div#nesteDiv {
   margin-bottom: 3%;
-}
-
-div#lastinn, div#addPersonDiv {
-  margin-top: 1em;
-  margin-bottom: 2em;
-}
-
-span#talelistaErTom {
-  font-size: 1.5em;
-  margin-bottom: 2em;
-}
-
-#view1div h3 {
-  font-size: 1.1em;
-}
-
-#view2div p{
-  padding: 0;
-  margin: 0;
-}
-
-#view2div h3 {
-  font-size: 2.8em;
-  padding-bottom: 1em;
-  margin: 0;
-}
-
-#view2div {
-  font-size: 1.4em;
-}
-
-#talelistestrong {
-  margin-bottom: 4em;
-  padding-bottom: 3em;
-}
-
-.taletid {
-  width: 2.2em;
 }

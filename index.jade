@@ -1,0 +1,128 @@
+doctype html
+html
+  head
+    script(src='lib/knockout-2.1.0.js')
+    
+    script(src='lib/underscore-min.js')
+    
+    script(src='lib/jquery-2.0.3.min.js')
+    
+    script(src='lib/faye-browser-min.js')
+    
+    script(src='lib/jquery.countdown.min.js')
+    
+    script(src='src/common.js')
+    
+    script(src='src/kommunikasjon.js')
+    
+    script(src='src/person.js')
+    
+    script(src='src/innlegg.js')
+    
+    script(src='src/innteikna.js')
+    
+    link(rel='stylesheet', type='text/css', href='stylesheet.css')
+  body
+    //
+      <input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />
+      <input data-bind="value: namnText" placeholder="Namn" />
+      <button type="submit">Inntegn!</button>
+      </form>
+    .liveExample
+      h2 Taletid
+      Klokka er 
+      span#klokka(data-bind='text: klokka() ')
+      
+      #addInnleggDiv
+        Teikn person til innlegg
+        form(data-bind='submit:addInnlegg')
+          select#typeInnlegg
+            option(value='innlegg') Innlegg
+            
+            option(value='replikk') Replikk
+            
+            option(value='dagsorden') Til dagsorden
+          
+          select#innleggsHaldar
+          
+          button(type='submit') Innteikn!
+      
+      #addPersonDiv
+        Legg til person p&aring; m&oslash;tet
+        form(data-bind='submit:addPerson')
+          // <input data-bind="value: delegatnummerText" placeholder="Delegatnummer" />
+          input(type='text', data-bind='value:newPersonName, valueUpdate: "afterkeydown"', placeholder='Namn')
+          
+          select#kjonnList
+            option(value='K') Kvinne
+            
+            option(value='M') Mann
+          
+          select#vervList
+            option(value='-') -
+            
+            option(value='SST') SST
+            
+            option(value='LS') LS
+          
+          button(type='submit', data-bind='enable: newPersonName().length > 0') Legg til person
+        
+      
+      p#snakkarNoAvsnitt
+        Snakkar no: 
+        strong
+          span(data-bind="text: activeSpeaker() ? activeSpeaker().speaker.name : ''")
+          (
+          span(data-bind="text: activeSpeaker() ? activeSpeaker().type : ''")
+          )
+        
+        span#snakkande
+        
+        span#countdown
+        
+        button#pauseButton(type='button') Pause
+      
+      strong Taleliste:
+       
+      ul#talelisteBoks(data-bind='foreach: allItems')
+        li
+          table
+            tr
+              td
+                span(data-bind='text: speaker.name')
+              
+              td
+                (
+                span(data-bind='text: getType()')
+                )
+              
+              td
+                a(href='#', data-bind='click: $parent.maybeRemoveSpeaker') Stryk
+                
+                a(href='#', data-bind='click: $parent.flyttOppTrykka') Flytt opp
+                
+                a(href='#', data-bind='click: $parent.flyttNedTrykka') Flytt ned
+      Andel jenter: 
+      span(data-bind='text: kjonnsprosent')
+      br
+      Andel SST: 
+      span(data-bind='text: sstprosent')
+      
+      #nesteDiv
+        button(data-bind='click: nextSpeaker, enable: allItems().length > 0') Neste talar
+      
+      em Kven har snakka s&aring; langt?
+      
+      ul(data-bind='foreach: harSnakka')
+        li
+          span(data-bind='text: speaker.name')
+          (
+          span(data-bind='text: getType()')
+          )
+          (
+          span(data-bind='text: speaker.verv')
+          )
+    script(type='text/javascript').
+      var model = new LM.BetterListModel();
+      console.log(model);
+      ko.applyBindings(model);

@@ -10,13 +10,6 @@ angular.module('myApp.view1', ['ngRoute'])
 }])
 
 .controller('View1Ctrl', ['$scope', function ($scope) {
-var intercom = Intercom.getInstance();
-$scope.taletidMinuttInnlegg = 3;
-$scope.taletidMinuttAndregangsInnlegg = 2;
-$scope.taletidMinuttReplikk = 1;
-$scope.taletidMinuttDagsorden = 1.5;
-$scope.talelistaErTom = "";
-
 var minutes = 0, seconds = 0, milisec = 0;
 var snakkaDa = "";
 	var beregnTaletid = function (innlegg) {
@@ -25,17 +18,17 @@ var snakkaDa = "";
 				speakers = _.pluck($scope.harSnakka, 'speaker');
 				speakers = _.pluck(speakers, 'name');
 				if (_.contains(speakers, innlegg.speaker.name)) {
-					return $scope.taletidMinuttAndregangsInnlegg * 60;
+					return 120;
 				}
 				else {
-					return $scope.taletidMinuttInnlegg * 60;
+					return 180;
 				}
 			}
 			else if (innlegg.type === "Replikk" || innlegg.type === "Svarreplikk") {
-				return $scope.taletidMinuttReplikk * 60;
+				return 60;
 			}
 			else {
-				return $scope.taletidMinuttDagsorden * 60;
+				return 120;
 			}
 	};
 	var Innlegg = {
@@ -79,8 +72,12 @@ var snakkaDa = "";
 	}
 	catch(err) {
 		$scope.allPersons = {};
-	}
-
+	} /* {
+		Mads: Person.create({name:"Mads",kjonn:"M"}),
+		Marie: Person.create({name:"Marie",kjonn:"K"}), 
+		Seher: Person.create({name:"Seher",kjonn:"K"}), 
+		Pål: Person.create({name:"Pål",kjonn:"M"})
+	};*/
 	var reset = function (innlegg) {
 		var taletid = Innlegg.taletid(innlegg);
 		var s = parseInt(taletid);
@@ -120,16 +117,18 @@ var snakkaDa = "";
         setTimeout(Timer,100, snakkarNo);
 	};
 
-	var resetTaleliste = function () {
-		//localStorage.taleliste = [];
-		try {
-			$scope.taleliste = JSON.parse(localStorage.taleliste);
-		}
-		catch(err) {
-			$scope.taleliste = [];
-		}
-	};
-	resetTaleliste();
+//	localStorage.taleliste = [];
+	try {
+		$scope.taleliste = JSON.parse(localStorage.taleliste);
+	}
+	catch(err) {
+		$scope.taleliste = [];
+	}
+	/*[
+		Innlegg.create({speaker:$scope.allPersons.Seher, type:"Innlegg"}),
+		Innlegg.create({speaker:$scope.allPersons.Mads, type:"Innlegg"}),
+		Innlegg.create({speaker:$scope.allPersons.Marie, type:"Innlegg"})
+	]; // Initial items*/
 
 	var self = this;
 
@@ -141,42 +140,32 @@ var snakkaDa = "";
 
 	fillSelect();
 
-	var resetHarSnakka = function () {
-		//	localStorage.harSnakka = [];
-		try {
-			$scope.harSnakka = JSON.parse(localStorage.harSnakka);
-		}
-		catch(err) {
-			$scope.harSnakka = [];
-		}
-	};
-	resetHarSnakka();
-
-	var sisteInnlegg = this.activeSpeaker;
-
-
-	$scope.addPersonFromView = function(delegatnummerText, name, kjonn) {
-		$scope.addPerson(delegatnummerText +": " + name, kjonnList.options[kjonnList.selectedIndex].text);
+//	localStorage.harSnakka = [];
+	try {
+		$scope.harSnakka = JSON.parse(localStorage.harSnakka);
 	}
+	catch(err) {
+		$scope.harSnakka = [];
+	}
+//	this.harSnakka = ko.observableArray([]);
+	
+//	this.activeSpeaker = ko.observable(Innlegg.create({type:"Innlegg", speaker:this.allPersons.Marie}));								
+	//reset(this.activeSpeaker(), this.harSnakka());
+	var sisteInnlegg = this.activeSpeaker;
 
 	$scope.addPerson = function (name, kjonn) {
 		if (name !== "" && name != undefined) { // Prevent blanks
 				var newPerson = Person.create({
 					name:name,
-					kjonn:kjonn
+					kjonn:kjonnList.options[kjonnList.selectedIndex].text
 			});
 			$scope.allPersons[newPerson.name] = newPerson;
 			fillSelect();
 			localStorage.allPersons = JSON.stringify($scope.allPersons);
 		} 
 	}
-	//localStorage.allPersons = [];
 
 	$scope.addInnlegg = function () {
-		if ($scope.taleliste.length === 0) {
-			$scope.talelistaErTom = "";
-		}
-
 		var selectList = document.getElementById("typeInnlegg");
 		var personList = document.getElementById("innleggsHaldar");
 
@@ -187,17 +176,16 @@ var snakkaDa = "";
 			type:type,
 			id:speaker.name + type + Math.random()
 		});
-		if (newInnlegg.type === "Til dagsorden") {
+		if (newInnlegg.getType() === "Til dagsorden") {
 			$scope.taleliste.splice(0,0,newInnlegg);
 		}
-		else if (newInnlegg.type === "Replikk") {
+		else if (newInnlegg.getType() === "Replikk") {
 			nyReplikk(newInnlegg);
 		}
 		else {
 			$scope.taleliste.push(newInnlegg);
 		}
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
-		intercom.emit('taleliste', {});
 	};
 	
 	$scope.flyttOpp = function (innlegg) {
@@ -206,7 +194,6 @@ var snakkaDa = "";
 		$scope.taleliste[index] = $scope.taleliste[index-1];
 		$scope.taleliste[index-1] = innlegg;
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
-		intercom.emit('taleliste', {});
 	};
 
 	$scope.flyttNed = function (innlegg) {
@@ -215,27 +202,25 @@ var snakkaDa = "";
 		$scope.taleliste[index] = $scope.taleliste[index+1];
 		$scope.taleliste[index+1] = innlegg;
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
-		intercom.emit('taleliste', {});
 	}
 
 	var nyReplikk = function (newPerson) {
 		var count = 0;
 		var itemInList = $scope.taleliste[count];
-		while (itemInList != null && itemInList != undefined && (itemInList.type !== "Innlegg" && itemInList.type !== "Svarreplikk" ) ) {
+		while (itemInList != null && ( itemInList.getType() !== "Innlegg" && itemInList.getType() !== "Svarreplikk" ) ) {
 			count++;
 			itemInList = $scope.taleliste[count];
 		}
-		if (!(_.find($scope.taleliste, function (obj) { return obj.type === "Svarreplikk";}))) {
+		if (!(_.find($scope.taleliste, function (obj) { return obj.getType() === "Svarreplikk";}))) {
 			$scope.taleliste.splice(count,0, Innlegg.create({speaker:sisteInnlegg.speaker, type: "Svarreplikk"}));
 		}
 		$scope.taleliste.splice(count,0,newPerson);
 	};
 
 	$scope.maybeRemoveSpeaker = function (speaker) {
-		if (confirm("Er du sikker på at du vil stryke " +speaker.type + " frå " +speaker.speaker.name +"?")) { 
+		if (confirm("Er du sikker på at du vil stryke " +speaker.speaker.name +"?")) { 
 			$scope.taleliste = _.without($scope.taleliste, speaker);
 			localStorage.taleliste = JSON.stringify($scope.taleliste);
-			intercom.emit('taleliste', {});
 		}
 	};
 
@@ -249,10 +234,7 @@ var snakkaDa = "";
 			oppdaterKjonnsfordeling();
 		}
 		$scope.activeSpeaker = _.first($scope.taleliste);
-
-		if ($scope.taleliste != undefined && $scope.taleliste.length > 0) {
 		$scope.taleliste.splice(0,1);
-		}
 		if ($scope.activeSpeaker != undefined) {
 			reset($scope.activeSpeaker);
 			Timer($scope.activeSpeaker);
@@ -261,12 +243,6 @@ var snakkaDa = "";
 		localStorage.taleliste = JSON.stringify($scope.taleliste);
 		localStorage.harSnakka = JSON.stringify($scope.harSnakka);
 		localStorage.activeSpeaker = JSON.stringify($scope.activeSpeaker);
-		intercom.emit('taleliste', {});
-		intercom.emit('activeSpeaker', {});
-
-		if ($scope.taleliste.length === 0) {
-			$scope.talelistaErTom = "Talelista er tom";
-		}
 	};
 
 	var oppdaterKjonnsfordeling = function () {
@@ -280,68 +256,21 @@ var snakkaDa = "";
 	}
 
 	$scope.feilfoert = function(speaker) {
-		if (confirm("Er du sikker på at dette " +speaker.type + "et frå " +speaker.speaker.name +" var feilført og skal fjernast?")) { 
+		if (confirm("Er du sikker på at dette " +speaker.type + "et frå " +speaker.speaker.name +" var feilført og skal fjernastcd?")) { 
 			$scope.harSnakka = _.without($scope.harSnakka, speaker);
 			localStorage.harSnakka = JSON.stringify($scope.harSnakka);
-			oppdaterKjonnsfordeling();
 		}
 	};
 
-	var downloadFile = function (data) {
-		data = _.map(data, function (element) {
-			return {"type": element.type, "name": element.speaker.name, "kjonn": element.speaker.kjonn};
-		});
-		data = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); 
-		window.open(data);
-	};
 
-
-	var resetActiveSpeakerFromDisk = function () {
-		try {
-			$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
-		}
-		catch(err) {
-			$scope.activeSpeaker = {};
-		}
-	};
-	resetActiveSpeakerFromDisk();
-
-	$scope.nextDebate = function () {
-		if (!confirm("Er du sikker på at denne debatten er ferdig? Talelista vil bli sletta, og du kan ikkje angre dette")) {
-			return;
-		}
-		downloadFile($scope.harSnakka);
-		$scope.activeSpeaker = {};
-		$scope.taleliste = [];
-		$scope.harSnakka = [];
-		$scope.kjonnsprosent = '';
-		localStorage.kjonnsprosent = JSON.stringify($scope.kjonnsprosent);
-		localStorage.harSnakka = JSON.stringify($scope.harSnakka);
-		localStorage.taleliste = JSON.stringify($scope.taleliste);
-		localStorage.activeSpeaker = JSON.stringify($scope.activeSpeaker);
-		intercom.emit('taleliste', {});
-		intercom.emit('activeSpeaker', {});
+	try {
+		$scope.activeSpeaker = JSON.parse(localStorage.activeSpeaker);
 	}
-	sisteInnlegg = $scope.activeSpeaker;
+	catch(err) {
+		$scope.activeSpeaker = {};
+	}
 
 	Timer(this.activeSpeaker);
 	oppdaterKjonnsfordeling();
-	var numberOfInterestingFieldsPerDelegate = 3;
-
-	$scope.uploadFile = function (files) {
-		var results = Papa.parse(files.files[0], {
-			complete: function(results) {
-				var i;
-				for (i = 0; i < results.data.length; i++) {
-					var row = results.data[i];
-					if (row.length === numberOfInterestingFieldsPerDelegate) {
-						console.log(results.data[i]);
-						var nrAndName = row[0] + ": " + row[1];
-						$scope.addPerson(nrAndName, row[2]);
-					}
-				}
-			}
-		});
-	};
 
 }]);
