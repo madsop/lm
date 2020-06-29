@@ -1,1 +1,0 @@
-[{"name":"A","kjonn":"Kvinne","verv":"SST"},{"name":"B","kjonn":"Kvinne","verv":"SST"},{"name":"AvC","kjonn":"Mann","verv":"-"},{"name":"Test","kjonn":"Kvinne","verv":"LS"},{"name":"t2","kjonn":"Kvinne","verv":"-"},{"name":"t3","kjonn":"Kvinne","verv":"-"},{"name":"AE","kjonn":"Mann","verv":"LS"}]
